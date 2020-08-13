@@ -20,5 +20,5 @@ setup(
     license="MIT",
     packages=find_packages(),
     install_requires=requirements,
-    long_description=read('README.md'),
+    long_description=read("README.md"),
 )
