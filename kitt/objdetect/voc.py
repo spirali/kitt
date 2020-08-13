@@ -12,7 +12,9 @@ from .annotation import AnnotatedImage, Annotation, BoundingBox
 from ..files import iterate_directories
 
 
-def load_voc_from_directories(directories: Iterable[str], num_workers: int = None) -> pd.DataFrame:
+def load_voc_from_directories(
+    directories: Iterable[str], num_workers: int = None
+) -> pd.DataFrame:
     """Load a pandas dataframe from directories containing VOC files"""
     items = defaultdict(lambda: [])
     num_workers = num_workers or multiprocessing.cpu_count()
@@ -36,7 +38,9 @@ def voc_to_annotated_image(path: str, load_image=True) -> AnnotatedImage:
         bbox = elem["bndbox"]
         bbox = tuple(int(bbox[key]) for key in ("xmin", "xmax", "ymin", "ymax"))
 
-        return Annotation(class_name=name, bbox=BoundingBox(*bbox).normalize(width, height))
+        return Annotation(
+            class_name=name, bbox=BoundingBox(*bbox).normalize(width, height)
+        )
 
     def find_image(directory, annotation_dir, filename):
         current_dir = annotation_dir
@@ -58,9 +62,13 @@ def voc_to_annotated_image(path: str, load_image=True) -> AnnotatedImage:
     filename = content["filename"]
     size = content["size"]
     width, height = (int(size[k]) for k in ("width", "height"))
-    annotations = tuple(parse_annotation(obj, width, height) for obj in content["object"])
+    annotations = tuple(
+        parse_annotation(obj, width, height) for obj in content["object"]
+    )
 
-    img_filename = find_image(content["folder"], os.path.dirname(os.path.abspath(path)), filename)
+    img_filename = find_image(
+        content["folder"], os.path.dirname(os.path.abspath(path)), filename
+    )
     if not img_filename or not os.path.isfile(img_filename):
         raise FileNotFoundError("Couldn't find image {}".format(filename))
     image = None
@@ -78,7 +86,9 @@ def annotated_image_to_voc(path: str, image: AnnotatedImage):
     parser.set_head(image.filename, image.width, image.height)
     for annotation in image.annotations:
         bbox = annotation.bbox.denormalize(image.width, image.height).to_int()
-        parser.add_object(annotation.class_name, bbox.xmin, bbox.ymin, bbox.xmax, bbox.ymax)
+        parser.add_object(
+            annotation.class_name, bbox.xmin, bbox.ymin, bbox.xmax, bbox.ymax
+        )
     parser.save(path)
 
 

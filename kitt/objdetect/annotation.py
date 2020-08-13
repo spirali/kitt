@@ -64,6 +64,7 @@ class AnnotatedImage:
     """
     Annotated image with a list of normalized bounding boxes.
     """
+
     image: Union[Image, None]
     filename: str
     annotations: Tuple[Annotation]

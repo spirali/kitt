@@ -4,3 +4,5 @@ pillow-simd>=7
 opencv-python>=4
 pandas>=1
 pascal-voc-tools==0.1.29
+matplotlib>=3
+seaborn>=0.10
