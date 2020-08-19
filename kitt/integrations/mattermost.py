@@ -8,7 +8,7 @@ import requests
 
 
 @contextlib.contextmanager
-def announce_computation():
+def announce_computation(priority="normal"):
     url = _get_mattermost_url()
     if "NO_ANNOUNCE" in os.environ:
         url = None
@@ -19,7 +19,7 @@ def announce_computation():
 
     user = getpass.getuser()
     device = socket.gethostname()
-    send(f"{user} started computing on {device} :cat:")
+    send(f"{user} started computing on {device} (priority={priority}) :cat:")
 
     def finished():
         send(f"{user} finished computing on {device} :tada:")
