@@ -1,5 +1,5 @@
 dataclasses>=0.7;python_version<'3.7'
-numpy>=1.19.1
+numpy>=1.18
 pillow-simd>=7
 opencv-python>=4
 pandas>=1
