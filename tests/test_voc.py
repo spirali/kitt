@@ -1,5 +1,5 @@
-from kitt.objdetect.annotation import BoundingBox
-from kitt.objdetect.voc import voc_to_annotated_image
+from kitt.image.objdetect.annotation import BoundingBox
+from kitt.image.objdetect.voc import voc_to_annotated_image
 from tests.conftest import data_path
 
 
