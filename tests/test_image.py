@@ -1,4 +1,4 @@
-from kitt.image import load_image_rgb
+from kitt.image.image import load_image_rgb
 from tests.conftest import data_path
 
 
