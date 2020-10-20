@@ -9,7 +9,7 @@ from PIL import Image
 from pascal_voc_tools import XmlParser
 
 from .annotation import AnnotatedImage, Annotation, BoundingBox
-from ..files import iterate_directories
+from ...files import iterate_directories
 
 
 def load_voc_from_directories(
