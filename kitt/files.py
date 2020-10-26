@@ -22,8 +22,3 @@ def iterate_directories(
     return itertools.chain.from_iterable(
         iterate_files(directory, extension) for directory in directories
     )
-
-
-def get_extension(path: str) -> str:
-    """Return the extension of a file path."""
-    return os.path.splitext(path)[1]

@@ -1,4 +1,5 @@
 import logging
+import os
 import subprocess
 from typing import Union
 
@@ -16,3 +17,8 @@ def get_process_output(args) -> Union[str, None]:
     except Exception as e:
         logging.error(e)
         return None
+
+
+def get_extension(path: str) -> str:
+    """Return the extension of a file path."""
+    return os.path.splitext(path)[1]
