@@ -1,3 +1,4 @@
+import inspect
 import os
 import re
 import sys
@@ -54,3 +55,26 @@ def get_packages_info():
             packages[match.group(1)] = match.group(2)
 
     return packages
+
+
+def get_arguments(index=0):
+    """Returns arguments of a function in the current call stack.
+    :param index: 0 - calling function, 1 - parent of calling function etc.
+    """
+    frame = inspect.currentframe()
+    frames = inspect.getouterframes(frame)
+    if len(frames) < index + 2:
+        return None
+    parent_frame = frames[index + 1]
+    args = inspect.getargvalues(parent_frame.frame)
+    context = {}
+
+    def assign(names):
+        for name in names:
+            if name in args.locals:
+                context[name] = args.locals[name]
+
+    assign(args.args)
+    assign([args.keywords])
+    assign([args.varargs])
+    return context
