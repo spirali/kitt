@@ -3,7 +3,7 @@ import os
 import pandas as pd
 
 from conftest import data_path
-from kitt.dataset import load_dataset, validation_split
+from kitt.dataset import assign_validation_split, load_dataset, split_dataset
 
 
 def test_load_dataset():
@@ -15,6 +15,15 @@ def test_load_dataset():
 
 
 def test_val_split():
-    dataset_path = pd.DataFrame({"a": [0] * 100})
-    df = validation_split(dataset_path, 0.2, random_state=0)
+    dataset = pd.DataFrame({"x": [0] * 100})
+    df = assign_validation_split(dataset, 0.2, random_state=0)
     assert len(df[~df["train"]]) == 20
+
+
+def test_split_dataset():
+    dataset = pd.DataFrame(
+        {"x": [0, 1, 2, 3, 4], "train": [True, True, True, False, False]}
+    )
+    train, validation = split_dataset(dataset)
+    assert list(train["x"]) == [0, 1, 2]
+    assert list(validation["x"]) == [3, 4]
