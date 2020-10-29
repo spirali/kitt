@@ -59,12 +59,41 @@ class BatchGenerator(Sequence):
 class EagerGenerator(BatchGenerator):
     """Preloads all samples from the given sequence and keeps them in memory"""
 
-    def __init__(self, generator: Sequence, batch_size: int, seed=None):
-        self.samples = get_all_samples(generator)
+    def __init__(self, sequence: Sequence, batch_size: int, seed=None):
+        self.samples = get_all_samples(sequence)
         super().__init__(len(self.samples), batch_size, seed=seed)
 
     def load_sample(self, index):
         return self.samples[index]
+
+
+class SequenceWrapper(Sequence):
+    """Wraps a sequence and delegates everything to it."""
+
+    def __init__(self, sequence: Sequence):
+        self.sequence = sequence
+
+    def __len__(self):
+        return len(self.sequence)
+
+    def __getitem__(self, item):
+        return self.sequence[item]
+
+    def on_epoch_end(self):
+        self.sequence.on_epoch_end()
+
+
+class MappingSequence(SequenceWrapper):
+    """Sequence that wraps another sequence and applies a function to its batches"""
+
+    def __init__(self, sequence: Sequence, map_x, map_y=None):
+        super().__init__(sequence)
+        self.map_x = map_x
+        self.map_y = map_y if map_y else lambda x: x
+
+    def __getitem__(self, item):
+        xs, ys = self.sequence[item]
+        return (self.map_x(xs), self.map_y(ys))
 
 
 def get_all_samples(generator):
