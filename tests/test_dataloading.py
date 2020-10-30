@@ -40,6 +40,22 @@ def test_eager_loading():
     check_test_generator(generator, len(dataset))
 
 
+def test_no_shuffle():
+    items = list(range(1000))
+    dataset = [items[i : i + 10] for i in range(len(items) // 10)]
+
+    class Generator(BatchGenerator):
+        def __init__(self):
+            super().__init__(len(dataset), batch_size=1, shuffle=False)
+
+        def load_sample(self, index):
+            return dataset[index], [index]
+
+    for (index, batch) in enumerate(Generator()):
+        assert (batch[0] == dataset[index]).all()
+        assert (batch[1] == [index]).all()
+
+
 def test_mapping():
     batches = [
         ([1, 2, 3], [8, 3, 4, 5]),

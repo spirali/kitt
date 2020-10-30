@@ -5,29 +5,36 @@ from tensorflow.keras.utils import Sequence
 
 
 class BatchIndexer:
-    def __init__(self, length: int, batch_size: int, seed=None):
+    def __init__(self, length: int, batch_size: int, seed=None, shuffle=True):
         assert batch_size > 0
         assert length > 0
+
+        if not shuffle:
+            assert seed is None
 
         self.batch_size = batch_size
         self.batch_count = int(math.ceil(length / self.batch_size))
         self.indices = np.arange(0, length)
-        self.random = np.random.RandomState(seed)
-        self.random.shuffle(self.indices)
+        self.shuffle = shuffle
+
+        if shuffle:
+            self.random = np.random.RandomState(seed)
+            self.random.shuffle(self.indices)
 
     def get_indices(self, start, end):
         return self.indices[start:end]
 
     def reset(self):
-        self.random.shuffle(self.indices)
+        if self.shuffle:
+            self.random.shuffle(self.indices)
 
     def __len__(self):
         return self.batch_count
 
 
 class BatchGenerator(Sequence):
-    def __init__(self, length: int, batch_size: int, seed=None):
-        self.indexer = BatchIndexer(length, batch_size, seed)
+    def __init__(self, length: int, batch_size: int, seed=None, shuffle=True):
+        self.indexer = BatchIndexer(length, batch_size, seed, shuffle)
 
     @property
     def batch_size(self):
@@ -59,12 +66,19 @@ class BatchGenerator(Sequence):
 class EagerGenerator(BatchGenerator):
     """Preloads all samples from the given sequence and keeps them in memory"""
 
-    def __init__(self, sequence: Sequence, batch_size: int, seed=None):
+    def __init__(self, sequence: Sequence, batch_size: int, seed=None, shuffle=True):
         self.samples = get_all_samples(sequence)
-        super().__init__(len(self.samples), batch_size, seed=seed)
+        super().__init__(len(self.samples), batch_size, seed, shuffle)
 
     def load_sample(self, index):
         return self.samples[index]
+
+
+def get_all_samples(generator):
+    samples = []
+    for batch in generator:
+        samples.extend(zip(*batch))
+    return samples
 
 
 class SequenceWrapper(Sequence):
@@ -89,15 +103,12 @@ class MappingSequence(SequenceWrapper):
     def __init__(self, sequence: Sequence, map_x, map_y=None):
         super().__init__(sequence)
         self.map_x = map_x
-        self.map_y = map_y if map_y else lambda x: x
+        self.map_y = map_y if map_y else identity
 
     def __getitem__(self, item):
         xs, ys = self.sequence[item]
         return (self.map_x(xs), self.map_y(ys))
 
 
-def get_all_samples(generator):
-    samples = []
-    for batch in generator:
-        samples.extend(zip(*batch))
-    return samples
+def identity(x):
+    return x
