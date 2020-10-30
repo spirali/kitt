@@ -8,7 +8,7 @@ def iterate_files(directory: str, extension: str) -> Iterable[str]:
     """Recursively return all files with the given `extension` that belong inside the given
     `directory`."""
     extension = extension.lstrip(".")
-    for xml in glob.glob(os.path.join(directory, f"**/*.{extension}"), recursive=True):
+    for xml in sorted(glob.glob(os.path.join(directory, f"**/*.{extension}"), recursive=True)):
         yield xml
 
 
