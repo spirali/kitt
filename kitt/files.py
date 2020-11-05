@@ -24,3 +24,9 @@ def iterate_directories(
     return itertools.chain.from_iterable(
         iterate_files(directory, extension) for directory in directories
     )
+
+
+def ensure_directory(path: str):
+    if os.path.isfile(path) and not os.path.isdir(path):
+        path = os.path.dirname(path)
+    os.makedirs(path, exist_ok=True)

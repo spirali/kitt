@@ -9,7 +9,7 @@ from PIL import Image
 from pascal_voc_tools import XmlParser
 
 from .annotation import AnnotatedImage, Annotation, BoundingBox
-from ...files import iterate_directories
+from ...files import ensure_directory, iterate_directories
 
 
 def load_voc_from_directories(
@@ -82,6 +82,8 @@ def voc_to_annotated_image(path: str, load_image=True) -> AnnotatedImage:
 
 
 def annotated_image_to_voc(path: str, image: AnnotatedImage):
+    ensure_directory(path)
+
     parser = XmlParser()
     parser.set_head(image.filename, image.width, image.height)
     for annotation in image.annotations:
