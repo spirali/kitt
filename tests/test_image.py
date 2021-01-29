@@ -2,6 +2,7 @@ import cv2
 import numpy as np
 
 from kitt.image.image import create_image_grid, load_image
+from kitt.image.segmentation.image import polygons_to_binary_mask
 from tests.conftest import data_path
 
 
@@ -31,3 +32,10 @@ def test_grid():
 
     assert grid_reference.shape == grid.shape
     assert not np.any(cv2.subtract(grid, grid_reference))
+
+
+def test_polygons_to_mask():
+    mask = polygons_to_binary_mask((16, 16), [[(2, 2), (2, 4), (4, 4), (4, 2)]])
+    image = np.zeros((16, 16), dtype=np.float)
+    image[2:5, 2:5] = 1
+    assert (image == mask).all()
