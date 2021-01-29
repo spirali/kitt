@@ -5,11 +5,11 @@ from collections import defaultdict
 from typing import Iterable
 
 import pandas as pd
-from PIL import Image
 from pascal_voc_tools import XmlParser
+from PIL import Image
 
-from .annotation import AnnotatedImage, Annotation, BoundingBox
 from ...files import ensure_directory, iterate_directories
+from .annotation import AnnotatedImage, Annotation, BoundingBox
 
 
 def load_voc_from_directories(
