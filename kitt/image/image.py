@@ -6,8 +6,10 @@ import numpy as np
 
 
 def load_image(
-    path: str, color_mode="rgb", target_size: Union[None, Tuple[int, int]] = None,
-    bgr=False
+    path: str,
+    color_mode="rgb",
+    target_size: Union[None, Tuple[int, int]] = None,
+    bgr=False,
 ) -> np.ndarray:
     """Load an RGB image from the given path, optionally resizing it."""
     from tensorflow.keras.preprocessing.image import load_img

@@ -22,7 +22,9 @@ def test_load_image_resize():
 
 
 def test_grid():
-    images = tuple(load_image(data_path(f"grid/{i}.jpg"), bgr=True) for i in range(1, 7))
+    images = tuple(
+        load_image(data_path(f"grid/{i}.jpg"), bgr=True) for i in range(1, 7)
+    )
     images = [
         cv2.resize(image, (image.shape[0] // 4, image.shape[1] // 4))
         for image in images
