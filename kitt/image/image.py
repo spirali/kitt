@@ -6,13 +6,17 @@ import numpy as np
 
 
 def load_image(
-    path: str, color_mode="rgb", target_size: Union[None, Tuple[int, int]] = None
+    path: str, color_mode="rgb", target_size: Union[None, Tuple[int, int]] = None,
+    bgr=False
 ) -> np.ndarray:
     """Load an RGB image from the given path, optionally resizing it."""
     from tensorflow.keras.preprocessing.image import load_img
 
     pil = load_img(path, color_mode=color_mode, target_size=target_size)
-    return np.array(pil)
+    image = np.array(pil)
+    if bgr:
+        image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
+    return image
 
 
 def create_empty_image_rgb(size: Tuple[int, int]) -> np.ndarray:
@@ -51,7 +55,7 @@ def create_image_grid(
     """Concatenates images into a grid with `cols` columns.
     Draws borders between images if `border` is True.
 
-    Assumes np.uint8 images.
+    Assumes np.uint8 BGR images.
     """
     images = tuple(images)
 
@@ -80,7 +84,7 @@ def create_image_grid(
         width = image.shape[1]
 
         if len(image.shape) < 3 or image.shape[2] == 1:
-            image = cv2.cvtColor(image, cv2.COLOR_GRAY2RGB)
+            image = cv2.cvtColor(image, cv2.COLOR_GRAY2BGR)
 
         grid[
             last_height : last_height + height, last_width : last_width + width
@@ -90,7 +94,7 @@ def create_image_grid(
                 grid,
                 (last_width, last_height),
                 (last_width + width, last_height + height),
-                color=(255, 0, 0),
+                color=(0, 0, 255),
             )
         last_width += width
 
