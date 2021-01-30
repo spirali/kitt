@@ -14,14 +14,14 @@ class ModelWrapper:
             del self.params["self"]
 
 
-def load_model_from_bytes(data: bytes) -> keras.Model:
+def load_model_from_bytes(data: bytes, **load_kwargs) -> keras.Model:
     bytes = io.BytesIO(data)
     with h5py.File(bytes, "r") as f:
-        return load_model(f)
+        return load_model(f, **load_kwargs)
 
 
-def save_model_to_bytes(model: keras.Model) -> bytes:
+def save_model_to_bytes(model: keras.Model, **save_kwargs) -> bytes:
     buffer = io.BytesIO()
     with h5py.File(buffer, "w") as f:
-        save_model(model, f)
+        save_model(model, f, **save_kwargs)
     return buffer.getvalue()
