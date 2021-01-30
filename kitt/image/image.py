@@ -27,12 +27,14 @@ def create_empty_image_rgb(size: Tuple[int, int]) -> np.ndarray:
 
 def resize_if_needed(image: np.ndarray, target_size: Tuple[int, int]) -> np.ndarray:
     """Resizes an image if it is needed.
-    Assumes image shape (height, width, channels)."""
+
+    :param image: (height, width, channels)
+    :param target_size: (width, height)"""
     if np.any(target_size > image.shape[:2]):
         logging.warning(f"Attempting to upsample from {image.shape} to {target_size}")
 
     size = image.shape[:2]
-    if size == target_size:
+    if size == target_size[::-1]:
         return image
     return cv2.resize(image, target_size)
 
