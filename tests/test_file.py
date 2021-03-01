@@ -11,6 +11,9 @@ def test_iterate_files():
 
 
 def test_iterate_directories():
-    assert len(list(iterate_directories((data_dir_path(), data_dir_path()), "jpeg"))) == 8
-    assert len(list(iterate_directories((data_dir_path(), data_dir_path()), "jpeg", "e"))) == 2
-    assert len(list(iterate_directories((data_dir_path(), data_dir_path()), "png"))) == 0
+    files = list(iterate_directories((data_dir_path(), data_dir_path()), "jpeg"))
+    assert len(files) == 8
+    files = list(iterate_directories((data_dir_path(), data_dir_path()), "jpeg", "e"))
+    assert len(files) == 2
+    files = list(iterate_directories((data_dir_path(), data_dir_path()), "png"))
+    assert len(files) == 0
