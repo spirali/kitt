@@ -1,7 +1,6 @@
-import cv2
 import numpy as np
 
-from kitt.image.image import create_image_grid, load_image
+from kitt.image.image import load_image
 from kitt.image.segmentation.image import polygons_to_binary_mask
 from tests.conftest import data_path
 
