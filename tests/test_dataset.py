@@ -12,6 +12,8 @@ def test_load_dataset():
     assert sorted(df["path"]) == [
         os.path.join(dataset_path, f"{p}.jpeg") for p in ("1", "2", "3")
     ]
+    df = load_dataset(dataset_path, ".jpeg", "1")
+    assert sorted(df["path"]) == [os.path.join(dataset_path, "1.jpeg")]
 
 
 def test_val_split():
