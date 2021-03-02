@@ -10,10 +10,11 @@ from .files import iterate_directories
 def create_dataset(
     directories: Union[str, Tuple[str]],
     extension: str,
+    sample_prefix: str = "",
     val_split: float = None,
     label_fn=None,
 ):
-    dataset = load_dataset(directories, extension)
+    dataset = load_dataset(directories, extension, sample_prefix)
     if val_split:
         dataset = assign_validation_split(dataset, val_split)
     if label_fn:
@@ -21,13 +22,15 @@ def create_dataset(
     return dataset
 
 
-def load_dataset(directories: Union[str, Tuple[str]], extension: str) -> pd.DataFrame:
+def load_dataset(
+    directories: Union[str, Tuple[str]], extension: str, sample_prefix: str = ""
+) -> pd.DataFrame:
     if not isinstance(directories, Iterable):
         directories = (directories,)
 
     items = (
         os.path.abspath(path)
-        for path in tuple(iterate_directories(directories, extension))
+        for path in tuple(iterate_directories(directories, extension, sample_prefix))
     )
     return pd.DataFrame({"path": items})
 
