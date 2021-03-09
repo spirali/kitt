@@ -2,6 +2,8 @@ import inspect
 import os
 import re
 import sys
+import time
+from datetime import datetime
 
 from .utils import get_extension, get_process_output
 
@@ -31,6 +33,10 @@ def get_environment():
         "git": get_git_info(),
         "packages": get_packages_info(),
         "env": os.environ.copy(),
+        "time": {
+            "unix": time.time(),
+            "date": str(datetime.now())
+        }
     }
 
 
