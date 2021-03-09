@@ -8,6 +8,9 @@ from tests.conftest import data_path
 def test_load_image_rgb():
     img = load_image(data_path("example.jpeg"))
     assert img.shape == (375, 500, 3)
+    assert np.amax(img) > 1.
+    img = load_image(data_path("example.jpeg"), normalize=True)
+    assert np.amax(img) <= 1.
 
 
 def test_load_image_grayscale():
