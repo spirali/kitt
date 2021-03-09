@@ -2,7 +2,7 @@ import io
 
 import h5py
 from tensorflow import keras
-from tensorflow.python.keras.models import load_model, save_model
+from tensorflow.keras.models import load_model, save_model
 
 from .environment import get_arguments
 
