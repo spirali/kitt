@@ -10,6 +10,7 @@ def load_image(
     color_mode="rgb",
     target_size: Union[None, Tuple[int, int]] = None,
     bgr=False,
+    normalize=False,
 ) -> np.ndarray:
     """Load an RGB image from the given path, optionally resizing it."""
     from tensorflow.keras.preprocessing.image import load_img
@@ -18,6 +19,8 @@ def load_image(
     image = np.array(pil)
     if bgr:
         image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
+    if normalize:
+        image = image / 255.
     return image
 
 
