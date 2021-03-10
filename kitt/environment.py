@@ -33,10 +33,7 @@ def get_environment():
         "git": get_git_info(),
         "packages": get_packages_info(),
         "env": os.environ.copy(),
-        "time": {
-            "unix": time.time(),
-            "date": str(datetime.now())
-        }
+        "time": {"unix": time.time(), "date": str(datetime.now())},
     }
 
 

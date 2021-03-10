@@ -6,8 +6,14 @@ from tensorflow.keras.callbacks import Callback
 
 
 class ModelCheckpoint(Callback):
-    def __init__(self, filepath: str, metric: str, mode: str = "max",
-                 save_every_n_epochs: int = None, save_n_best=1):
+    def __init__(
+        self,
+        filepath: str,
+        metric: str,
+        mode: str = "max",
+        save_every_n_epochs: int = None,
+        save_n_best=1,
+    ):
         """
         :param filepath: Filepath where to save the model.
         :param metric: Metric to observe.
@@ -75,13 +81,11 @@ class ModelCheckpoint(Callback):
                     os.unlink(previous_path)
                 except IOError as e:
                     logging.error(
-                        f"Could not remove previously stored model path {previous_path}: {e}")
+                        f"Could not remove previously stored model path {previous_path}: {e}"
+                    )
 
     def save_model(self, path: str):
         self.model.save(path, overwrite=True)
 
     def get_filepath(self, epoch, logs):
-        return self.filepath.format(
-            epoch=epoch,
-            **logs
-        )
+        return self.filepath.format(epoch=epoch, **logs)

@@ -1,3 +1,4 @@
+import cv2
 import numpy as np
 
 from kitt.image.image import load_image
@@ -8,9 +9,13 @@ from tests.conftest import data_path
 def test_load_image_rgb():
     img = load_image(data_path("example.jpeg"))
     assert img.shape == (375, 500, 3)
-    assert np.amax(img) > 1.
-    img = load_image(data_path("example.jpeg"), normalize=True)
-    assert np.amax(img) <= 1.
+    assert np.max(img) > 1.0
+
+
+def test_load_image_bgr():
+    img = load_image(data_path("example.jpeg"))
+    img2 = load_image(data_path("example.jpeg"), color_mode="bgr")
+    assert (cv2.cvtColor(img2, cv2.COLOR_BGR2RGB) == img).all()
 
 
 def test_load_image_grayscale():
@@ -21,6 +26,11 @@ def test_load_image_grayscale():
 def test_load_image_resize():
     img = load_image(data_path("example.jpeg"), target_size=(224, 224))
     assert img.shape == (224, 224, 3)
+
+
+def test_load_image_normalize():
+    img = load_image(data_path("example.jpeg"), normalize=True)
+    assert np.max(img) <= 1.0
 
 
 def test_polygons_to_mask():

@@ -1,4 +1,4 @@
-from kitt.files import iterate_files, iterate_directories
+from kitt.files import iterate_directories, iterate_files
 from tests.conftest import data_dir_path
 
 
