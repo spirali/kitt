@@ -4,14 +4,12 @@ import h5py
 from tensorflow import keras
 from tensorflow.keras.models import load_model, save_model
 
-from .environment import get_arguments
+from .environment import get_constructor_arguments
 
 
 class ModelWrapper:
     def __init__(self):
-        self.params = get_arguments(1)
-        if "self" in self.params:
-            del self.params["self"]
+        self.params = get_constructor_arguments()
 
 
 def load_model_from_bytes(data: bytes, **load_kwargs) -> keras.Model:

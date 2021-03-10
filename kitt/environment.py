@@ -61,23 +61,39 @@ def get_packages_info():
 
 
 def get_arguments(index=0):
-    """Returns arguments of a function in the current call stack.
+    """Yields frames and arguments of functions in the current call stack, starting from the
+    selected index.
+
     :param index: 0 - calling function, 1 - parent of calling function etc.
     """
     frame = inspect.currentframe()
     frames = inspect.getouterframes(frame)
     if len(frames) < index + 2:
         return None
-    parent_frame = frames[index + 1]
-    args = inspect.getargvalues(parent_frame.frame)
-    context = {}
+    for parent_frame in frames[index + 1 :]:
+        args = inspect.getargvalues(parent_frame.frame)
+        context = {}
 
-    def assign(names):
-        for name in names:
-            if name in args.locals:
-                context[name] = args.locals[name]
+        def assign(names):
+            for name in names:
+                if name in args.locals:
+                    context[name] = args.locals[name]
 
-    assign(args.args)
-    assign([args.keywords])
-    assign([args.varargs])
-    return context
+        assign(args.args)
+        assign([args.keywords])
+        assign([args.varargs])
+        yield (parent_frame, context)
+
+
+def get_constructor_arguments():
+    arguments = {}
+
+    for (frame, args) in get_arguments(1):
+        if frame.function == "__init__":
+            arguments.update(args)
+        else:
+            break
+
+    if "self" in arguments:
+        del arguments["self"]
+    return arguments
