@@ -13,6 +13,7 @@ class ModelCheckpoint(Callback):
         mode: str = "max",
         save_every_n_epochs: int = None,
         save_n_best=1,
+        save_optimizer=False
     ):
         """
         :param filepath: Filepath where to save the model. Can contain "epoch" and "<monitor>"
@@ -22,6 +23,7 @@ class ModelCheckpoint(Callback):
         if it gets lower or higher.
         :param save_n_best: Save last N best models.
         :param save_every_n_epochs: Save the model every N epochs.
+        :param save_optimizer: Include optimizer state in the saved model checkpoint.
         """
         super().__init__()
         self.filepath = str(filepath)
@@ -29,6 +31,7 @@ class ModelCheckpoint(Callback):
         self.save_n_best = save_n_best or 0
         self.save_every_n_epochs = save_every_n_epochs
         self.epochs_since_save = 0
+        self.save_optimizer = save_optimizer
 
         assert self.save_every_n_epochs is None or self.save_every_n_epochs > 0
         assert self.save_n_best >= 0
@@ -87,7 +90,7 @@ class ModelCheckpoint(Callback):
                     )
 
     def save_model(self, path: str):
-        self.model.save(path, overwrite=True)
+        self.model.save(path, overwrite=True, include_optimizer=self.save_optimizer)
 
     def get_filepath(self, epoch, logs):
         return self.filepath.format(epoch=epoch, **logs)
