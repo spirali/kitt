@@ -9,21 +9,23 @@ class ModelCheckpoint(Callback):
     def __init__(
         self,
         filepath: str,
-        metric: str,
+        monitor: str,
         mode: str = "max",
         save_every_n_epochs: int = None,
         save_n_best=1,
     ):
         """
-        :param filepath: Filepath where to save the model.
-        :param metric: Metric to observe.
-        :param mode: "min" or "max"
-        :param save_n_best: Save N best models,
-        :param save_every_n_epochs: Save the model every N epochs
+        :param filepath: Filepath where to save the model. Can contain "epoch" and "<monitor>"
+        formatting placeholders.
+        :param monitor: What metric to observe.
+        :param mode: One of {"min", "max"}. Whether to consider the monitored metric to improve
+        if it gets lower or higher.
+        :param save_n_best: Save last N best models.
+        :param save_every_n_epochs: Save the model every N epochs.
         """
         super().__init__()
         self.filepath = str(filepath)
-        self.metric = metric
+        self.monitor = monitor
         self.save_n_best = save_n_best or 0
         self.save_every_n_epochs = save_every_n_epochs
         self.epochs_since_save = 0
@@ -46,7 +48,7 @@ class ModelCheckpoint(Callback):
     def on_epoch_end(self, epoch, logs=None):
         self.epochs_since_save += 1
 
-        metric_value = logs[self.metric]
+        metric_value = logs[self.monitor]
         path = self.get_filepath(epoch + 1, logs=logs)
         saved = False
 
