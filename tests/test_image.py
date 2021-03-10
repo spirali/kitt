@@ -1,7 +1,7 @@
 import cv2
 import numpy as np
 
-from kitt.image.image import load_image
+from kitt.image.image import load_image, resize_if_needed
 from kitt.image.segmentation.image import polygons_to_binary_mask
 from tests.conftest import data_path
 
@@ -38,3 +38,22 @@ def test_polygons_to_mask():
     image = np.zeros((16, 16), dtype=np.float)
     image[2:5, 2:5] = 1
     assert (image == mask).all()
+
+
+def test_resize_avoid_useless_resize():
+    img = np.zeros((4, 4))
+    img2 = resize_if_needed(img, img.shape)
+    assert img is img2
+
+
+def test_resize_handle_dimensions_correctly():
+    img = np.zeros((8, 4))
+    img2 = resize_if_needed(img, (8, 4))
+    assert img2.shape == (4, 8)
+
+
+def test_resize_keep_last_dim():
+    img = np.zeros((8, 4))
+    img = img.reshape((8, 4, 1))
+    img2 = resize_if_needed(img, (8, 4))
+    assert img2.shape == (4, 8, 1)

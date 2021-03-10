@@ -48,7 +48,10 @@ def resize_if_needed(image: np.ndarray, target_size: Tuple[int, int]) -> np.ndar
     size = image.shape[:2]
     if size == target_size[::-1]:
         return image
-    return cv2.resize(image, target_size)
+    resized = cv2.resize(image, target_size)
+    if resized.ndim < image.ndim:
+        resized = np.expand_dims(resized, -1)
+    return resized
 
 
 def display_image(image: np.ndarray, window="Kitt", wait=True):
