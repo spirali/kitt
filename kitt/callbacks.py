@@ -13,7 +13,7 @@ class ModelCheckpoint(Callback):
         mode: str = "max",
         save_every_n_epochs: int = None,
         save_n_best=1,
-        save_optimizer=False
+        save_optimizer=False,
     ):
         """
         :param filepath: Filepath where to save the model. Can contain "epoch" and "<monitor>"

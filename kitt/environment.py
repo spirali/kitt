@@ -5,7 +5,14 @@ import sys
 import time
 from datetime import datetime
 
+from yaml import SafeDumper
+
 from .utils import get_extension, get_process_output
+
+
+class CustomDumper(SafeDumper):
+    def ignore_aliases(self, data):
+        return True
 
 
 def write_environment_yaml(path: str, **kwargs):
@@ -24,7 +31,7 @@ def write_environment_yaml(path: str, **kwargs):
         del data["env"]
 
     with open(path, "w") as f:
-        yaml.dump(data, f)
+        yaml.dump(data, f, Dumper=CustomDumper)
 
 
 def get_environment():
