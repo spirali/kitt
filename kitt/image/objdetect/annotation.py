@@ -64,6 +64,7 @@ class Annotation:
     class_name: str
     bbox: BoundingBox
     annotation_type: AnnotationType = AnnotationType.GROUND_TRUTH
+    confidence: float = None
 
 
 @dataclass
