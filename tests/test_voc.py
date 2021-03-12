@@ -1,4 +1,4 @@
-from kitt.image.objdetect.annotation import BoundingBox
+from kitt.image.objdetect.annotation import BoundingBox, AnnotationType
 from kitt.image.objdetect.voc import voc_to_annotated_image
 from tests.conftest import data_path
 
@@ -10,6 +10,8 @@ def test_load_voc_xml():
     assert height == 375
 
     assert annotated.annotations[0].class_name == "dog"
+    assert annotated.annotations[0].confidence is None
+    assert annotated.annotations[0].annotation_type == AnnotationType.GROUND_TRUTH
     assert annotated.annotations[0].bbox.denormalize(
         width, height
     ).to_int() == BoundingBox(144, 255, 90, 201)
