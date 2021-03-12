@@ -42,6 +42,10 @@ class BoundingBox:
     def center(self) -> Tuple[float, float]:
         return (self.xmin + (self.width / 2), self.ymin + (self.height / 2))
 
+    @property
+    def area(self) -> float:
+        return self.width * self.height
+
     def denormalize(self, width: float, height: float) -> "BoundingBox":
         return BoundingBox(
             self.xmin * width, self.xmax * width, self.ymin * height, self.ymax * height
