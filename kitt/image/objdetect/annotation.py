@@ -3,6 +3,12 @@ from typing import Tuple, Union
 
 import numpy as np
 from PIL.Image import Image
+from enum import Enum
+
+
+class AnnotationType(Enum):
+    GROUND_TRUTH = 1
+    PREDICTION = 2
 
 
 @dataclass
@@ -57,6 +63,7 @@ class BoundingBox:
 class Annotation:
     class_name: str
     bbox: BoundingBox
+    annotation_type: AnnotationType = AnnotationType.GROUND_TRUTH
 
 
 @dataclass
