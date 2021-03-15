@@ -1,4 +1,5 @@
 import itertools
+from typing import List
 
 import cv2
 import numpy as np
@@ -23,3 +24,16 @@ def color_bitmap_masks(mask, palette=DEFAULT_PALETTE):
         img = img.astype(np.uint8)
         colored.append(img)
     return colored
+
+
+def overlay_masks(background: np.ndarray, masks: List[np.ndarray], alpha=1.0):
+    """
+    Overlays colored masks over a background (only places where mask is nonzero are overlaid).
+    Alpha specifies how visible should the masks be.
+    """
+    for mask in masks:
+        indices = np.where(mask > 0)
+        if all(np.any(i) for i in indices):
+            background[indices] = cv2.addWeighted(background[indices], 1 - alpha, mask[indices],
+                                                  alpha, 0).squeeze()
+    return background

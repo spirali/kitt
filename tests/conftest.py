@@ -14,6 +14,10 @@ def data_path(path: str) -> str:
     return str(TEST_DIR / "data" / path)
 
 
-def check_image_equality(image: np.ndarray, path: str, color_mode="rgb"):
+def check_image_equality(image: np.ndarray, path: str, color_mode="rgb", delta=None):
     reference = load_image(data_path(path), color_mode=color_mode)
-    assert (image == reference).all()
+
+    if delta is None:
+        assert (image == reference).all()
+    else:
+        assert np.allclose(image[:, :], reference[:, :], rtol=delta)
