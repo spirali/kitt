@@ -3,7 +3,7 @@ import numpy as np
 
 from kitt.image.image import load_image, resize_if_needed
 from kitt.image.segmentation.image import polygons_to_binary_mask
-from kitt.image.segmentation.mask import color_bitmap_masks
+from kitt.image.segmentation.mask import color_bitmap_masks, overlay_masks
 from tests.conftest import check_image_equality, data_path
 
 
@@ -80,3 +80,26 @@ def test_color_bitmap_masks():
     colored_masks = color_bitmap_masks((mask1, mask2, mask3, mask4), palette)
     for (index, mask) in enumerate(colored_masks):
         check_image_equality(mask, data_path(f"segmentation/color_masks/mask-{index}.png"))
+
+
+def test_overlay_masks():
+    masks = [
+        load_image(data_path(f"segmentation/color_masks/mask-{i}.png"))
+        for i in range(4)
+    ]
+    background = np.zeros((100, 100, 3), dtype=np.uint8)
+    background[:, :] = (50, 50, 50)
+
+    check_image_equality(overlay_masks(background, masks, alpha=1.0),
+                         data_path("segmentation/color_masks/overlay-alpha-1.0.png"), delta=1)
+    check_image_equality(overlay_masks(background, masks, alpha=0.5),
+                         data_path("segmentation/color_masks/overlay-alpha-0.5.png"), delta=1)
+
+
+def test_overlay_empty_mask():
+    mask = np.zeros((100, 100, 3), dtype=np.uint8)
+    background = np.zeros((100, 100, 3), dtype=np.uint8)
+    background[:, :] = (50, 50, 50)
+
+    overlaid = overlay_masks(background.copy(), [mask])
+    assert (background == overlaid).all()
