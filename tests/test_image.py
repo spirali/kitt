@@ -3,7 +3,8 @@ import numpy as np
 
 from kitt.image.image import load_image, resize_if_needed
 from kitt.image.segmentation.image import polygons_to_binary_mask
-from tests.conftest import data_path
+from kitt.image.segmentation.mask import color_bitmap_masks
+from tests.conftest import check_image_equality, data_path
 
 
 def test_load_image_rgb():
@@ -13,9 +14,8 @@ def test_load_image_rgb():
 
 
 def test_load_image_bgr():
-    img = load_image(data_path("example.jpeg"))
     img2 = load_image(data_path("example.jpeg"), color_mode="bgr")
-    assert (cv2.cvtColor(img2, cv2.COLOR_BGR2RGB) == img).all()
+    check_image_equality(cv2.cvtColor(img2, cv2.COLOR_BGR2RGB), data_path("example.jpeg"))
 
 
 def test_load_image_grayscale():
@@ -57,3 +57,26 @@ def test_resize_keep_last_dim():
     img = img.reshape((8, 4, 1))
     img2 = resize_if_needed(img, (8, 4))
     assert img2.shape == (4, 8, 1)
+
+
+def test_color_bitmap_masks():
+    mask1 = np.zeros((100, 100), dtype=np.uint8)
+    mask1[10:30, 20:40] = 255
+
+    mask2 = np.zeros((100, 100), dtype=np.uint8)
+    mask2[35:50, 40:60] = 255
+
+    mask3 = np.zeros((100, 100), dtype=np.uint8)
+    mask3[35:50, 70:90] = 255
+
+    mask4 = np.zeros((100, 100), dtype=np.uint8)
+    mask4[70:95, 10:80] = 255
+
+    palette = [
+        (1.0, 0.0, 0.0),
+        (0.0, 1.0, 0.0),
+        (0.0, 0.0, 1.0)
+    ]
+    colored_masks = color_bitmap_masks((mask1, mask2, mask3, mask4), palette)
+    for (index, mask) in enumerate(colored_masks):
+        check_image_equality(mask, data_path(f"segmentation/color_masks/mask-{index}.png"))
