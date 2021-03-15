@@ -1,19 +1,23 @@
 from kitt.files import iterate_directories, iterate_files
-from tests.conftest import data_dir_path
+from conftest import data_path
 
 
 def test_iterate_files():
-    assert len(list(iterate_files(data_dir_path(), "jpeg"))) == 4
-    assert len(list(iterate_files(data_dir_path(), ".jpeg"))) == 4
-    assert len(list(iterate_files(data_dir_path(), "jpeg", "e"))) == 1
-    assert len(list(iterate_files(data_dir_path(), "png"))) == 0
-    assert len(list(iterate_files(data_dir_path(), "jpeg", "a"))) == 0
+    directory = data_path("files/d1")
+    assert len(list(iterate_files(directory, "foo"))) == 3
+    assert len(list(iterate_files(directory, ".foo"))) == 3
+    assert len(list(iterate_files(directory, "foo", "e"))) == 2
+    assert len(list(iterate_files(directory, "foo", "a"))) == 1
+    assert len(list(iterate_files(directory, "bar"))) == 0
 
 
 def test_iterate_directories():
-    files = list(iterate_directories((data_dir_path(), data_dir_path()), "jpeg"))
-    assert len(files) == 8
-    files = list(iterate_directories((data_dir_path(), data_dir_path()), "jpeg", "e"))
-    assert len(files) == 2
-    files = list(iterate_directories((data_dir_path(), data_dir_path()), "png"))
+    directory1 = data_path("files/d1")
+    directory2 = data_path("files/d2")
+
+    files = list(iterate_directories((directory1, directory2), "foo"))
+    assert len(files) == 5
+    files = list(iterate_directories((directory1, directory2), "foo", "e"))
+    assert len(files) == 3
+    files = list(iterate_directories((directory1, directory2), "baz"))
     assert len(files) == 0
