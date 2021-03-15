@@ -68,6 +68,14 @@ def bgr_to_rgb(image: np.ndarray) -> np.ndarray:
     return cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
 
 
+def channels_first_to_last(arr: np.ndarray) -> np.ndarray:
+    return np.transpose(arr, (1, 2, 0))
+
+
+def channels_last_to_first(arr: np.ndarray) -> np.ndarray:
+    return np.transpose(arr, (2, 0, 1))
+
+
 def create_image_grid(
     images: Iterable[np.ndarray], cols: int, border=False
 ) -> np.ndarray:
