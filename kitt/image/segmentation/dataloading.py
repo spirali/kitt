@@ -1,10 +1,11 @@
 from tensorflow.keras.preprocessing.image import ImageDataGenerator
+from tensorflow.keras.utils import Sequence
 
 from ...dataloading import SequenceWrapper
 
 
 class SegmentationAugmentingSequence(SequenceWrapper):
-    def __init__(self, sequence, augmentation_args, seed=None):
+    def __init__(self, sequence: Sequence, augmentation_args, seed=None):
         """
         Sequence that wraps another sequence and augments both inputs and labels using
         keras.ImageDataGenerator.
