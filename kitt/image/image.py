@@ -55,9 +55,13 @@ def resize_if_needed(image: np.ndarray, target_size: Tuple[int, int]) -> np.ndar
 
 
 def display_image(image: np.ndarray, window="Kitt", wait=True):
+    """
+    Returns true if 'Q' was pressed.
+    """
     cv2.imshow(window, rgb_to_bgr(image))
     if wait:
-        cv2.waitKey()
+        return (cv2.waitKey() & 0xFF) == ord("q")
+    return False
 
 
 def rgb_to_bgr(image: np.ndarray) -> np.ndarray:
