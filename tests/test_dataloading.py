@@ -7,7 +7,7 @@ from kitt.dataloading import BatchGenerator, EagerGenerator, MappingSequence
 from kitt.image.segmentation.dataloading import SegmentationAugmentingSequence
 
 
-class TestGenerator(BatchGenerator):
+class Generator(BatchGenerator):
     def __init__(self, dataset, batch_size: int):
         super().__init__(dataset, batch_size)
 
@@ -30,14 +30,14 @@ def check_test_generator(generator, length):
 @pytest.mark.parametrize("batch_size", range(1, 9))
 def test_batch_size(batch_size):
     dataset = list(range(7))
-    generator = TestGenerator(len(dataset), batch_size)
+    generator = Generator(len(dataset), batch_size)
     check_test_generator(generator, len(dataset))
 
 
 def test_eager_loading():
     batch_size = 2
     dataset = list(range(7))
-    generator = EagerGenerator(TestGenerator(len(dataset), batch_size), 3)
+    generator = EagerGenerator(Generator(len(dataset), batch_size), 3)
     check_test_generator(generator, len(dataset))
 
 
