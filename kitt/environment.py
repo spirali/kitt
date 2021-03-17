@@ -1,3 +1,4 @@
+import dataclasses
 import inspect
 import os
 import re
@@ -13,6 +14,11 @@ from .utils import get_extension, get_process_output
 class CustomDumper(SafeDumper):
     def ignore_aliases(self, data):
         return True
+
+    def represent_data(self, data):
+        if dataclasses.is_dataclass(data):
+            return super().represent_dict(dataclasses.asdict(data))
+        return super().represent_data(data)
 
 
 def write_environment_yaml(path: str, **kwargs):
