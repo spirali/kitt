@@ -46,7 +46,7 @@ def binarize_mask(mask: np.ndarray, threshold=0.5) -> np.ndarray:
 
     Values lower than `threshold` will be set to zero, values higher will be set to 1.
     """
-    assert mask.dtype == np.float
+    assert np.issubdtype(mask.dtype, np.floating)
     _, result = cv2.threshold(mask, threshold, 1, cv2.THRESH_BINARY)
     if result.shape != mask.shape:
         result = result.reshape(mask.shape)
