@@ -34,6 +34,7 @@ def overlay_masks(background: np.ndarray, masks: List[np.ndarray], alpha=1.0):
     for mask in masks:
         indices = np.where(mask > 0)
         if all(np.any(i) for i in indices):
-            background[indices] = cv2.addWeighted(background[indices], 1 - alpha, mask[indices],
-                                                  alpha, 0).squeeze()
+            background[indices] = cv2.addWeighted(
+                background[indices], 1 - alpha, mask[indices], alpha, 0
+            ).squeeze()
     return background

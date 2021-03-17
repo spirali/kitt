@@ -1,9 +1,9 @@
 from dataclasses import dataclass
+from enum import Enum
 from typing import Tuple, Union
 
 import numpy as np
 from PIL.Image import Image
-from enum import Enum
 
 
 class AnnotationType(Enum):

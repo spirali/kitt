@@ -1,5 +1,6 @@
-from kitt.files import iterate_directories, iterate_files
 from conftest import data_path
+
+from kitt.files import iterate_directories, iterate_files
 
 
 def test_iterate_files():

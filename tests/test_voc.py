@@ -1,4 +1,4 @@
-from kitt.image.objdetect.annotation import BoundingBox, AnnotationType
+from kitt.image.objdetect.annotation import AnnotationType, BoundingBox
 from kitt.image.objdetect.voc import voc_to_annotated_image
 from tests.conftest import data_path
 

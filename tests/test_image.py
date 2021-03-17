@@ -15,7 +15,9 @@ def test_load_image_rgb():
 
 def test_load_image_bgr():
     img2 = load_image(data_path("example.jpeg"), color_mode="bgr")
-    check_image_equality(cv2.cvtColor(img2, cv2.COLOR_BGR2RGB), data_path("example.jpeg"))
+    check_image_equality(
+        cv2.cvtColor(img2, cv2.COLOR_BGR2RGB), data_path("example.jpeg")
+    )
 
 
 def test_load_image_grayscale():
@@ -72,14 +74,12 @@ def test_color_bitmap_masks():
     mask4 = np.zeros((100, 100), dtype=np.uint8)
     mask4[70:95, 10:80] = 255
 
-    palette = [
-        (1.0, 0.0, 0.0),
-        (0.0, 1.0, 0.0),
-        (0.0, 0.0, 1.0)
-    ]
+    palette = [(1.0, 0.0, 0.0), (0.0, 1.0, 0.0), (0.0, 0.0, 1.0)]
     colored_masks = color_bitmap_masks((mask1, mask2, mask3, mask4), palette)
     for (index, mask) in enumerate(colored_masks):
-        check_image_equality(mask, data_path(f"segmentation/color_masks/mask-{index}.png"))
+        check_image_equality(
+            mask, data_path(f"segmentation/color_masks/mask-{index}.png")
+        )
 
 
 def test_overlay_masks():
@@ -90,10 +90,16 @@ def test_overlay_masks():
     background = np.zeros((100, 100, 3), dtype=np.uint8)
     background[:, :] = (50, 50, 50)
 
-    check_image_equality(overlay_masks(background, masks, alpha=1.0),
-                         data_path("segmentation/color_masks/overlay-alpha-1.0.png"), delta=1)
-    check_image_equality(overlay_masks(background, masks, alpha=0.5),
-                         data_path("segmentation/color_masks/overlay-alpha-0.5.png"), delta=1)
+    check_image_equality(
+        overlay_masks(background, masks, alpha=1.0),
+        data_path("segmentation/color_masks/overlay-alpha-1.0.png"),
+        delta=1,
+    )
+    check_image_equality(
+        overlay_masks(background, masks, alpha=0.5),
+        data_path("segmentation/color_masks/overlay-alpha-0.5.png"),
+        delta=1,
+    )
 
 
 def test_overlay_empty_mask():
