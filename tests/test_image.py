@@ -3,7 +3,11 @@ import numpy as np
 
 from kitt.image.image import load_image, resize_if_needed
 from kitt.image.segmentation.image import polygons_to_binary_mask
-from kitt.image.segmentation.mask import color_bitmap_masks, overlay_masks
+from kitt.image.segmentation.mask import (
+    binarize_mask,
+    color_bitmap_masks,
+    overlay_masks,
+)
 from tests.conftest import check_image_equality, data_path
 
 
@@ -109,3 +113,47 @@ def test_overlay_empty_mask():
 
     overlaid = overlay_masks(background.copy(), [mask])
     assert (background == overlaid).all()
+
+
+def test_binarize_mask():
+    mask = np.array(
+        [
+            [0.4, 0.6, 1.0],
+            [0, 0.2, 0.1],
+            [0.8, 0.3, 0.5],
+        ]
+    )
+    binarized = binarize_mask(mask, threshold=0.5)
+    assert (
+        binarized
+        == np.array(
+            [
+                [0, 1, 1],
+                [0, 0, 0],
+                [1, 0, 0],
+            ],
+            dtype=np.float32,
+        )
+    ).all()
+
+
+def test_binarize_mask_multichannel():
+    mask = np.array(
+        [
+            [[0.4, 0.6], [0.6, 0.9], [1.0, 1.0]],
+            [[0, 1.0], [0.2, 0.1], [0.4, 0.3]],
+            [[1.0, 0.8], [0.0, 0.0], [0.7, 0.2]],
+        ]
+    )
+    binarized = binarize_mask(mask, threshold=0.5)
+    assert (
+        binarized
+        == np.array(
+            [
+                [[0, 1], [1, 1], [1, 1]],
+                [[0, 1], [0, 0], [0, 0]],
+                [[1, 1], [0, 0], [1, 0]],
+            ],
+            dtype=np.float32,
+        )
+    ).all()

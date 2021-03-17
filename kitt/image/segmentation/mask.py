@@ -38,3 +38,16 @@ def overlay_masks(background: np.ndarray, masks: List[np.ndarray], alpha=1.0):
                 background[indices], 1 - alpha, mask[indices], alpha, 0
             ).squeeze()
     return background
+
+
+def binarize_mask(mask: np.ndarray, threshold=0.5) -> np.ndarray:
+    """
+    Binarize a (possibly multi-channel) mask with the given threshold.
+
+    Values lower than `threshold` will be set to zero, values higher will be set to 1.
+    """
+    assert mask.dtype == np.float
+    _, result = cv2.threshold(mask, threshold, 1, cv2.THRESH_BINARY)
+    if result.shape != mask.shape:
+        result = result.reshape(mask.shape)
+    return result
