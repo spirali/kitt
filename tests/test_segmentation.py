@@ -1,7 +1,12 @@
 import numpy as np
 from conftest import check_image_equality, data_path
 
+from kitt.dataloading import BatchGenerator
 from kitt.image.image import load_image
+from kitt.image.segmentation.dataloading import (
+    PatchingSequence,
+    SegmentationAugmentingSequence,
+)
 from kitt.image.segmentation.mask import (
     binarize_mask,
     color_bitmap_masks,
@@ -141,3 +146,78 @@ def test_get_patch():
         get_patch(image, 4, 2, 8).flatten()
         == [36, 37, 38, 39, 44, 45, 46, 47, 52, 53, 54, 55, 60, 61, 62, 63]
     ).all()
+
+
+def test_segmentation_loader_apply_same_augment():
+    class ImageGenerator(BatchGenerator):
+        def __init__(self, length, batch_size: int):
+            super().__init__(length, batch_size)
+
+        def load_sample(self, index):
+            image = np.random.randn(3, 3, 3)
+            return image, image
+
+    generator = SegmentationAugmentingSequence(
+        ImageGenerator(4, 2),
+        dict(
+            rotation_range=10.0,
+            width_shift_range=0.02,
+            height_shift_range=0.02,
+            zoom_range=0.1,
+            horizontal_flip=True,
+            vertical_flip=True,
+            fill_mode="constant",
+        ),
+    )
+    for (x, y) in generator:
+        assert np.allclose(x, y)
+
+
+def test_patching_data_loader():
+    class ImageGenerator(BatchGenerator):
+        def __init__(self, images, masks, batch_size):
+            super().__init__(len(images), batch_size, shuffle=False)
+            self.images = images
+            self.masks = masks
+
+        def load_sample(self, index):
+            return self.images[index], self.masks[index]
+
+    items = []
+    dim = 4
+    count = dim * dim
+    for i in range(8):
+        start = i * count
+        item = np.array(list(range(start, start + count))).reshape((dim, dim))
+        items.append(item)
+
+    def contained_within(image, subimage):
+        def check(a, b, upper_left):
+            ul_row = upper_left[0]
+            ul_col = upper_left[1]
+            b_rows, b_cols = b.shape
+            a_slice = a[ul_row : ul_row + b_rows, :][:, ul_col : ul_col + b_cols]
+            if a_slice.shape != b.shape:
+                return False
+            return (a_slice == b).all()
+
+        def find_slice(big_array, small_array):
+            upper_left = np.argwhere(big_array == small_array[0, 0])
+            for ul in upper_left:
+                if check(big_array, small_array, ul):
+                    return True
+            return False
+
+        return find_slice(image, subimage)
+
+    images = items[:4]
+    masks = items[4:]
+    generator = ImageGenerator(images, masks, batch_size=2)
+    generator = PatchingSequence(generator, size=2, stride=2)
+    for (index, (xs, ys)) in enumerate(generator):
+        assert xs.shape == (2, 2, 2)
+        assert ys.shape == (2, 2, 2)
+        for i in range(2):
+            original_index = index * 2 + i
+            assert contained_within(images[original_index], xs[i])
+            assert contained_within(masks[original_index], ys[i])

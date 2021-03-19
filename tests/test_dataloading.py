@@ -4,7 +4,6 @@ import numpy as np
 import pytest
 
 from kitt.dataloading import BatchGenerator, EagerGenerator, MappingSequence
-from kitt.image.segmentation.dataloading import SegmentationAugmentingSequence
 
 
 class Generator(BatchGenerator):
@@ -110,28 +109,3 @@ def test_mapping():
             [10, 4, 4, 12],
         ],
     )
-
-
-def test_segmentation_input_label_same_augment():
-    class ImageGenerator(BatchGenerator):
-        def __init__(self, length, batch_size: int):
-            super().__init__(length, batch_size)
-
-        def load_sample(self, index):
-            image = np.random.randn(3, 3, 3)
-            return image, image
-
-    generator = SegmentationAugmentingSequence(
-        ImageGenerator(4, 2),
-        dict(
-            rotation_range=10.0,
-            width_shift_range=0.02,
-            height_shift_range=0.02,
-            zoom_range=0.1,
-            horizontal_flip=True,
-            vertical_flip=True,
-            fill_mode="constant",
-        ),
-    )
-    for (x, y) in generator:
-        assert np.allclose(x, y)
