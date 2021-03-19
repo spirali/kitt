@@ -4,11 +4,13 @@ from typing import Iterable, Tuple, Union
 import cv2
 import numpy as np
 
+ImageSize = Tuple[int, int]
+
 
 def load_image(
     path: str,
     color_mode="rgb",
-    target_size: Union[None, Tuple[int, int]] = None,
+    target_size: Union[None, ImageSize] = None,
     normalize=False,
 ) -> np.ndarray:
     """Load an RGB image from the given path, optionally resizing it.
@@ -33,11 +35,11 @@ def load_image(
     return image
 
 
-def create_empty_image_rgb(size: Tuple[int, int]) -> np.ndarray:
+def create_empty_image_rgb(size: ImageSize) -> np.ndarray:
     return np.zeros((*size, 3), dtype=np.uint8)
 
 
-def resize_if_needed(image: np.ndarray, target_size: Tuple[int, int]) -> np.ndarray:
+def resize_if_needed(image: np.ndarray, target_size: ImageSize) -> np.ndarray:
     """Resizes an image if it is needed.
 
     :param image: (height, width, channels)
@@ -78,6 +80,10 @@ def channels_first_to_last(arr: np.ndarray) -> np.ndarray:
 
 def channels_last_to_first(arr: np.ndarray) -> np.ndarray:
     return np.transpose(arr, (2, 0, 1))
+
+
+def get_image_size(image: np.ndarray) -> ImageSize:
+    return image.shape[:2][::-1]
 
 
 def create_image_grid(
