@@ -4,6 +4,71 @@ import numpy as np
 from tensorflow.keras.utils import Sequence
 
 
+# Generic data loaders
+class DataLoader:
+    """
+    Loads individual items of a dataset (without batching).
+    """
+
+    def __len__(self):
+        raise NotImplementedError
+
+    def __getitem__(self, item):
+        raise NotImplementedError
+
+    def __iter__(self):
+        """Create a generator that iterate over the loader."""
+        for item in (self[i] for i in range(len(self))):
+            yield item
+
+
+class ListDataLoader(DataLoader):
+    def __init__(self, items):
+        self.items = items
+
+    def __len__(self):
+        return len(self.items)
+
+    def __getitem__(self, index):
+        return self.items[index]
+
+
+class LoaderWrapper(DataLoader):
+    """Wraps a loader and delegates everything to it."""
+
+    def __init__(self, loader: DataLoader):
+        self.loader = loader
+
+    def __len__(self):
+        return len(self.loader)
+
+    def __getitem__(self, item):
+        return self.loader[item]
+
+
+class EagerLoader(LoaderWrapper):
+    """Preloads all samples from the given sequence and keeps them in memory"""
+
+    def __init__(self, loader: DataLoader):
+        super().__init__(loader)
+        self.items = tuple(loader)
+
+    def __getitem__(self, index):
+        return self.items[index]
+
+
+class MappingLoader(LoaderWrapper):
+    """Loader that wraps another loader and applies a function to its items"""
+
+    def __init__(self, loader: DataLoader, map_fn):
+        super().__init__(loader)
+        self.map_fn = map_fn
+
+    def __getitem__(self, item):
+        return self.map_fn(self.loader[item])
+
+
+# Keras adapters
 class BatchIndexer:
     def __init__(self, length: int, batch_size: int, seed=None, shuffle=True):
         assert batch_size > 0
@@ -32,16 +97,20 @@ class BatchIndexer:
         return self.batch_count
 
 
-class BatchGenerator(Sequence):
-    def __init__(self, length: int, batch_size: int, seed=None, shuffle=True):
-        self.indexer = BatchIndexer(length, batch_size, seed, shuffle)
+class BatchSequence(Sequence):
+    """
+    Sequence that takes a loader and aggregates it into batches.
+    It does not construct numpy arrays!
+    You have to wrap the resulting generator in NumpyBatchGenerator.
+    """
+
+    def __init__(self, loader: DataLoader, batch_size: int, seed=None, shuffle=True):
+        self.indexer = BatchIndexer(len(loader), batch_size, seed, shuffle)
+        self.loader = loader
 
     @property
     def batch_size(self):
         return self.indexer.batch_size
-
-    def load_sample(self, index):
-        raise NotImplementedError()
 
     def __len__(self):
         return len(self.indexer)
@@ -56,33 +125,17 @@ class BatchGenerator(Sequence):
         start = index * self.batch_size
         end = start + self.batch_size
         for index in self.indexer.get_indices(start, end):
-            x, y = self.load_sample(index)
+            x, y = self.loader[index]
             xs.append(x)
             ys.append(y)
 
-        return np.array(xs), np.array(ys)
+        return xs, ys
 
 
-class EagerGenerator(BatchGenerator):
-    """Preloads all samples from the given sequence and keeps them in memory"""
-
-    def __init__(self, sequence: Sequence, batch_size: int, seed=None, shuffle=True):
-        self.samples = get_all_samples(sequence)
-        super().__init__(len(self.samples), batch_size, seed, shuffle)
-
-    def load_sample(self, index):
-        return self.samples[index]
-
-
-def get_all_samples(generator):
-    samples = []
-    for batch in generator:
-        samples.extend(zip(*batch))
-    return samples
-
-
-class SequenceWrapper(Sequence):
-    """Wraps a sequence and delegates everything to it."""
+class ToNumpySequence(Sequence):
+    """
+    Takes a Keras sequence that returns tuple (batch_x, batch_y) and transforms them to np.array.
+    """
 
     def __init__(self, sequence: Sequence):
         self.sequence = sequence
@@ -90,25 +143,9 @@ class SequenceWrapper(Sequence):
     def __len__(self):
         return len(self.sequence)
 
-    def __getitem__(self, item):
-        return self.sequence[item]
+    def __getitem__(self, index):
+        xs, ys = self.sequence[index]
+        return np.array(xs), np.array(ys)
 
     def on_epoch_end(self):
         self.sequence.on_epoch_end()
-
-
-class MappingSequence(SequenceWrapper):
-    """Sequence that wraps another sequence and applies a function to its batches"""
-
-    def __init__(self, sequence: Sequence, map_x, map_y=None):
-        super().__init__(sequence)
-        self.map_x = map_x
-        self.map_y = map_y if map_y else identity
-
-    def __getitem__(self, item):
-        xs, ys = self.sequence[item]
-        return (self.map_x(xs), self.map_y(ys))
-
-
-def identity(x):
-    return x

@@ -1,11 +1,11 @@
 import numpy as np
 from conftest import check_image_equality, data_path
 
-from kitt.dataloading import BatchGenerator
+from kitt.dataloading import DataLoader
 from kitt.image.image import load_image
 from kitt.image.segmentation.dataloading import (
-    PatchingSequence,
-    SegmentationAugmentingSequence,
+    PatchingSamplerLoader,
+    SegmentationAugmentationLoader,
 )
 from kitt.image.segmentation.mask import (
     binarize_mask,
@@ -149,16 +149,17 @@ def test_get_patch():
 
 
 def test_segmentation_loader_apply_same_augment():
-    class ImageGenerator(BatchGenerator):
-        def __init__(self, length, batch_size: int):
-            super().__init__(length, batch_size)
+    class Loader(DataLoader):
+        def __len__(self):
+            return 2
 
-        def load_sample(self, index):
+        def __getitem__(self, item):
             image = np.random.randn(3, 3, 3)
             return image, image
 
-    generator = SegmentationAugmentingSequence(
-        ImageGenerator(4, 2),
+    loader = Loader()
+    loader = SegmentationAugmentationLoader(
+        loader,
         dict(
             rotation_range=10.0,
             width_shift_range=0.02,
@@ -169,18 +170,21 @@ def test_segmentation_loader_apply_same_augment():
             fill_mode="constant",
         ),
     )
-    for (x, y) in generator:
+    for (x, y) in loader:
         assert np.allclose(x, y)
 
 
-def test_patching_data_loader():
-    class ImageGenerator(BatchGenerator):
-        def __init__(self, images, masks, batch_size):
-            super().__init__(len(images), batch_size, shuffle=False)
+def test_patching_loader():
+    class Loader(DataLoader):
+        def __init__(self, images, masks):
+            assert len(images) == len(masks)
             self.images = images
             self.masks = masks
 
-        def load_sample(self, index):
+        def __len__(self):
+            return len(self.images)
+
+        def __getitem__(self, index):
             return self.images[index], self.masks[index]
 
     items = []
@@ -212,12 +216,10 @@ def test_patching_data_loader():
 
     images = items[:4]
     masks = items[4:]
-    generator = ImageGenerator(images, masks, batch_size=2)
-    generator = PatchingSequence(generator, size=2, stride=2)
-    for (index, (xs, ys)) in enumerate(generator):
-        assert xs.shape == (2, 2, 2)
-        assert ys.shape == (2, 2, 2)
-        for i in range(2):
-            original_index = index * 2 + i
-            assert contained_within(images[original_index], xs[i])
-            assert contained_within(masks[original_index], ys[i])
+    loader = Loader(images, masks)
+    loader = PatchingSamplerLoader(loader, size=2, stride=2)
+    for (index, (x, y)) in enumerate(loader):
+        assert x.shape == (2, 2)
+        assert y.shape == (2, 2)
+        assert contained_within(images[index], x)
+        assert contained_within(masks[index], y)
