@@ -21,11 +21,14 @@ class CustomDumper(SafeDumper):
         return super().represent_data(data)
 
 
+def write_yaml(object, stream):
+    import yaml
+    yaml.dump(object, stream, Dumper=CustomDumper)
+
+
 def write_environment_yaml(path: str, **kwargs):
     """Store information about the environment into the passed YAML file"""
     assert get_extension(path) in (".yml", ".yaml")
-
-    import yaml
 
     data = get_environment()
     if kwargs:
@@ -37,7 +40,7 @@ def write_environment_yaml(path: str, **kwargs):
         del data["env"]
 
     with open(path, "w") as f:
-        yaml.dump(data, f, Dumper=CustomDumper)
+        write_yaml(data, f)
 
 
 def get_environment():
