@@ -1,13 +1,13 @@
-from .annotation import BoundingBox, Annotation
+from .annotation import BBox
 
 
-def iou(bb_a: BoundingBox, bb_b: BoundingBox) -> float:
+def iou(bb_a: BBox, bb_b: BBox) -> float:
     intersection = get_intersection_area(bb_a, bb_b)
     union = get_union_area(bb_a, bb_b, inter_area=intersection)
     return intersection / union
 
 
-def boxes_intersect(bb_a: BoundingBox, bb_b: BoundingBox) -> float:
+def boxes_intersect(bb_a: BBox, bb_b: BBox) -> float:
     if bb_a.xmin >= bb_b.xmax:
         return False  # A is right of B
     if bb_b.xmin >= bb_a.xmax:
@@ -19,7 +19,7 @@ def boxes_intersect(bb_a: BoundingBox, bb_b: BoundingBox) -> float:
     return True
 
 
-def get_intersection_area(bb_a: BoundingBox, bb_b: BoundingBox) -> float:
+def get_intersection_area(bb_a: BBox, bb_b: BBox) -> float:
     if not boxes_intersect(bb_a, bb_b):
         return 0
     x_a = max(bb_a.xmin, bb_b.xmin)
@@ -29,7 +29,7 @@ def get_intersection_area(bb_a: BoundingBox, bb_b: BoundingBox) -> float:
     return (x_b - x_a) * (y_b - y_a)
 
 
-def get_union_area(bb_a: BoundingBox, bb_b: BoundingBox, inter_area: float = None) -> float:
+def get_union_area(bb_a: BBox, bb_b: BBox, inter_area: float = None) -> float:
     area_a = bb_a.area
     area_b = bb_b.area
     if inter_area is None:

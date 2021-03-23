@@ -3,7 +3,7 @@ from typing import Tuple
 import cv2
 import numpy as np
 
-from .annotation import AnnotatedImage, BoundingBox
+from .annotation import AnnotatedImage, BBox
 
 
 def render_annotated_image(
@@ -22,7 +22,7 @@ def render_annotated_image(
 
 def render_boxes(
     image: np.ndarray,
-    boxes: Tuple[BoundingBox],
+    boxes: Tuple[BBox],
     labels: Tuple[str] = None,
     probs: Tuple[float] = None,
 ):

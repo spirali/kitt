@@ -1,6 +1,7 @@
-from kitt.image.objdetect.annotation import AnnotationType, BoundingBox
+from conftest import data_path
+
+from kitt.image.objdetect.annotation import AnnotationType
 from kitt.image.objdetect.voc import voc_to_annotated_image
-from tests.conftest import data_path
 
 
 def test_load_voc_xml():
@@ -14,8 +15,8 @@ def test_load_voc_xml():
     assert annotated.annotations[0].annotation_type == AnnotationType.GROUND_TRUTH
     assert annotated.annotations[0].bbox.denormalize(
         width, height
-    ).to_int() == BoundingBox(144, 255, 90, 201)
+    ).to_int().as_tuple() == (144, 255, 90, 201)
     assert annotated.annotations[1].class_name == "dog"
     assert annotated.annotations[1].bbox.denormalize(
         width, height
-    ).to_int() == BoundingBox(264, 380, 73, 180)
+    ).to_int().as_tuple() == (264, 380, 73, 180)

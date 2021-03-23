@@ -6,20 +6,29 @@ import numpy as np
 from PIL.Image import Image
 
 
-class AnnotationType(Enum):
-    GROUND_TRUTH = 1
-    PREDICTION = 2
+@dataclass(frozen=True)
+class BBoxBase:
+    """
+    Represents a base class for bounding boxes.
+    Use either `BBox` or `NormalizedBBox`.
 
+    The origin of the coordinate format is in the "top-left corner", i.e.:
+    X grows to the right
+    Y grows to the bottom
+    """
 
-@dataclass
-class BoundingBox:
     xmin: float
     xmax: float
     ymin: float
     ymax: float
 
-    @property
-    def data(self) -> Tuple[float, float, float, float]:
+    __slots__ = ["xmin", "xmax", "ymin", "ymax"]
+
+    def __post_init__(self):
+        if type(self) is BBoxBase:
+            raise Exception("Please create either BBox or NormalizedBBox")
+
+    def as_tuple(self) -> Tuple[float, float, float, float]:
         return (self.xmin, self.xmax, self.ymin, self.ymax)
 
     @property
@@ -46,27 +55,47 @@ class BoundingBox:
     def area(self) -> float:
         return self.width * self.height
 
-    def denormalize(self, width: float, height: float) -> "BoundingBox":
-        return BoundingBox(
-            self.xmin * width, self.xmax * width, self.ymin * height, self.ymax * height
-        )
+    def __repr__(self):
+        return repr(self.as_tuple())
 
-    def normalize(self, width: float, height: float) -> "BoundingBox":
-        return BoundingBox(
+
+class BBox(BBoxBase):
+    def normalize(self, width: float, height: float) -> "NormalizedBBox":
+        return NormalizedBBox(
             self.xmin / width, self.xmax / width, self.ymin / height, self.ymax / height
         )
 
-    def to_int(self) -> "BoundingBox":
-        return BoundingBox(*(int(v) for v in self.data))
+    def to_int(self) -> "BBox":
+        return BBox(*(int(v) for v in self.as_tuple()))
 
-    def __repr__(self):
-        return repr(self.data)
+
+class NormalizedBBox(BBoxBase):
+    """
+    BoundingBox with normalized coordinates in the range [0, 1].
+    """
+
+    def __post_init__(self):
+        super().__post_init__()
+        assert 0 <= self.xmin <= 1
+        assert 0 <= self.xmax <= 1
+        assert 0 <= self.ymin <= 1
+        assert 0 <= self.ymax <= 1
+
+    def denormalize(self, width: float, height: float) -> "BBox":
+        return BBox(
+            self.xmin * width, self.xmax * width, self.ymin * height, self.ymax * height
+        )
+
+
+class AnnotationType(Enum):
+    GROUND_TRUTH = 1
+    PREDICTION = 2
 
 
 @dataclass
 class Annotation:
     class_name: str
-    bbox: BoundingBox
+    bbox: NormalizedBBox
     annotation_type: AnnotationType = AnnotationType.GROUND_TRUTH
     confidence: float = None
 
