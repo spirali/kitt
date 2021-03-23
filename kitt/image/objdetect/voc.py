@@ -9,14 +9,14 @@ from pascal_voc_tools import XmlParser
 from PIL import Image
 
 from ...files import ensure_directory, iterate_directories
-from .annotation import AnnotatedImage, Annotation, BoundingBox
+from .annotation import AnnotatedImage, Annotation, BBox
 
 
 def load_voc_from_directories(
     directories: Iterable[str], num_workers: int = None
 ) -> pd.DataFrame:
     """Load a pandas dataframe from directories containing VOC files"""
-    items = defaultdict(lambda: [])
+    items = defaultdict(list)
     num_workers = num_workers or multiprocessing.cpu_count()
 
     files = tuple(iterate_directories(directories, "xml"))
@@ -38,9 +38,7 @@ def voc_to_annotated_image(path: str, load_image=True) -> AnnotatedImage:
         bbox = elem["bndbox"]
         bbox = tuple(int(bbox[key]) for key in ("xmin", "xmax", "ymin", "ymax"))
 
-        return Annotation(
-            class_name=name, bbox=BoundingBox(*bbox).normalize(width, height)
-        )
+        return Annotation(class_name=name, bbox=BBox(*bbox).normalize(width, height))
 
     def find_image(directory, annotation_dir, filename):
         current_dir = annotation_dir
