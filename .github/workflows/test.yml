@@ -1,6 +1,10 @@
 name: Tests
 
-on: [push, pull_request]
+on:
+  push:
+    branches:
+      - master
+  pull_request:
 
 jobs:
   build:
@@ -26,3 +30,4 @@ jobs:
       run: flake8 .
     - name: Format
       run: black --check .
+      continue-on-error: true

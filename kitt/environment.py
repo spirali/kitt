@@ -23,6 +23,7 @@ class CustomDumper(SafeDumper):
 
 def write_yaml(object, stream):
     import yaml
+
     yaml.dump(object, stream, Dumper=CustomDumper)
 
 
