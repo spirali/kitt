@@ -2,6 +2,7 @@ import dataclasses
 import inspect
 import os
 import re
+import subprocess
 import sys
 import time
 from datetime import datetime
@@ -114,3 +115,28 @@ def get_constructor_arguments():
     if "self" in arguments:
         del arguments["self"]
     return arguments
+
+
+DESCRIPTOR_CLONERS = {"stdout": None, "stderr": None}
+
+
+def clone_descriptor(descriptor, path: str):
+    """
+    Clones the output of the specified descriptor ("stdout" or "stderr") into the
+    specified file.
+
+    If you clone both stderr and stdout, clone stderr first to avoid mixing them.
+
+    Can be only called once per descriptor inside a process.
+    Linux only!
+    """
+    path = os.path.abspath(path)
+    os.makedirs(os.path.dirname(path), exist_ok=True)
+
+    assert DESCRIPTOR_CLONERS[descriptor] is None
+
+    descriptor_map = {"stdout": sys.stdout, "stderr": sys.stderr}
+
+    tee = subprocess.Popen(["tee", path], stdin=subprocess.PIPE)
+    os.dup2(tee.stdin.fileno(), descriptor_map[descriptor].fileno())
+    DESCRIPTOR_CLONERS[descriptor] = tee
