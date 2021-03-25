@@ -1,9 +1,9 @@
-from dataclasses import dataclass
 from enum import Enum
-from typing import Tuple, Union
+from typing import Tuple, Union, List
 
 import numpy as np
 from PIL.Image import Image
+from dataclasses import dataclass
 
 
 @dataclass(frozen=True)
@@ -108,7 +108,7 @@ class AnnotatedImage:
 
     image: Union[Image, None]
     filename: str
-    annotations: Tuple[Annotation]
+    annotations: List[Annotation]
 
     @property
     def width(self) -> int:
