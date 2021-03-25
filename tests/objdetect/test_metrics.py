@@ -1,9 +1,15 @@
-from kitt.image.objdetect.annotation import BBox
+from kitt.image.objdetect.annotation import (
+    BBox,
+    AnnotatedImage,
+    Annotation,
+    AnnotationType,
+)
 from kitt.image.objdetect.metrics import (
     boxes_intersect,
     get_intersection_area,
     get_union_area,
     iou,
+    get_metrics,
 )
 
 
@@ -81,3 +87,24 @@ def test_get_union_area():
 
     bb_e = BBox(0, 5, 0, 5)
     assert get_union_area(bb_e, bb_b) == bb_e.area
+
+
+def test_metrics():
+    bb = BBox(0.0, 0.5, 0.0, 0.5)
+    image_a = AnnotatedImage(
+        None,
+        "a.jpg",
+        (
+            Annotation("a", bb, AnnotationType.GROUND_TRUTH),
+            Annotation("a", bb, AnnotationType.PREDICTION),
+        ),
+    )
+    metrics = get_metrics([image_a])
+    assert metrics["mAP"] == 1.0
+
+    bb = BBox(0.0, 0.5, 0.0, 0.5)
+    image_a = AnnotatedImage(
+        None, "a.jpg", (Annotation("a", bb, AnnotationType.GROUND_TRUTH),)
+    )
+    metrics = get_metrics([image_a])
+    assert metrics["mAP"] == 0.0
