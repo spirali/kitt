@@ -90,21 +90,48 @@ def test_get_union_area():
 
 
 def test_metrics():
-    bb = BBox(0.0, 0.5, 0.0, 0.5)
+    width = 10
+    height = 10
+
+    bb = BBox(0, 5, 0, 5).normalize(width, height)
     image_a = AnnotatedImage(
         None,
         "a.jpg",
-        (
+        [
             Annotation("a", bb, AnnotationType.GROUND_TRUTH),
-            Annotation("a", bb, AnnotationType.PREDICTION),
-        ),
+            Annotation("a", bb, AnnotationType.PREDICTION, confidence=0.9),
+        ],
     )
     metrics = get_metrics([image_a])
     assert metrics["mAP"] == 1.0
 
-    bb = BBox(0.0, 0.5, 0.0, 0.5)
+    bb = BBox(0, 5, 0, 5).normalize(width, height)
     image_a = AnnotatedImage(
-        None, "a.jpg", (Annotation("a", bb, AnnotationType.GROUND_TRUTH),)
+        None, "a.jpg", [Annotation("a", bb, AnnotationType.GROUND_TRUTH)]
     )
     metrics = get_metrics([image_a])
     assert metrics["mAP"] == 0.0
+
+    bb_a_gt = BBox(0, 5, 0, 5).normalize(width, height)
+    bb_a_det = BBox(0, 5, 0, 5).normalize(width, height)
+    image_a = AnnotatedImage(
+        None,
+        "a.jpg",
+        [
+            Annotation("a", bb_a_gt, AnnotationType.GROUND_TRUTH),
+            Annotation("a", bb_a_det, AnnotationType.PREDICTION, confidence=0.9),
+        ],
+    )
+    bb_b_gt = BBox(0, 5, 0, 5).normalize(width, height)
+    bb_b_det = BBox(0, 5, 0, 5).normalize(width, height)
+    image_b = AnnotatedImage(
+        None,
+        "b.jpg",
+        [
+            Annotation("a", bb_b_gt, AnnotationType.GROUND_TRUTH),
+            Annotation("a", bb_b_det, AnnotationType.PREDICTION, confidence=0.9),
+        ],
+    )
+    metrics = get_metrics([image_a, image_b])
+    assert metrics == {}
+    assert metrics["mAP"] == 1.0

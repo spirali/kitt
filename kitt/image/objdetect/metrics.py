@@ -1,8 +1,14 @@
+from dataclasses import dataclass
 from typing import List
 
 import numpy as np
 
 from .annotation import BBox, AnnotationType, AnnotatedImage
+
+
+@dataclass
+class Metrics:
+    iou_threshold: float
 
 
 def iou(bb_a: BBox, bb_b: BBox) -> float:
@@ -158,12 +164,12 @@ def get_metrics(annotated_images: List[AnnotatedImage], iou_threshold: float = 0
             "precision": precision,
             "recall": rec,
             "AP": ap,
-            "interpolated precision": mpre,
-            "interpolated recall": mrec,
-            "total positives": n_pos,
-            "total TP": np.sum(tp),
-            "total FP": np.sum(fp),
-            "iou": iou_threshold,
+            "interpolated_precision": mpre,
+            "interpolated_recall": mrec,
+            "total_positives": n_pos,
+            "total_TP": np.sum(tp),
+            "total_FP": np.sum(fp),
+            "iou_threshold": iou_threshold,
         }
 
     # For mAP, only the classes in the gt set should be considered
