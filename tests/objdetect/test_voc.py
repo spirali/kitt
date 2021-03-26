@@ -12,7 +12,7 @@ def test_load_voc_xml():
 
     assert annotated.annotations[0].class_name == "dog"
     assert annotated.annotations[0].confidence is None
-    assert annotated.annotations[0].annotation_type == AnnotationType.GROUND_TRUTH
+    assert annotated.annotations[0].type == AnnotationType.GROUND_TRUTH
     assert annotated.annotations[0].bbox.denormalize(
         width, height
     ).to_int().as_tuple() == (144, 255, 90, 201)
