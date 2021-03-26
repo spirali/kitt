@@ -111,12 +111,34 @@ class AnnotationType(Enum):
     PREDICTION = 2
 
 
-@dataclass
+# Annotations need to be comparable by identity, not value
+@dataclass(frozen=True, eq=False)
 class Annotation:
     class_name: str
     bbox: NormalizedBBox
-    annotation_type: AnnotationType = AnnotationType.GROUND_TRUTH
+    type: AnnotationType = AnnotationType.GROUND_TRUTH
     confidence: float = None
+
+    @staticmethod
+    def ground_truth(class_name: str, bbox: NormalizedBBox) -> "Annotation":
+        return Annotation(
+            class_name=class_name, bbox=bbox, type=AnnotationType.GROUND_TRUTH
+        )
+
+    @staticmethod
+    def prediction(
+        class_name: str, bbox: NormalizedBBox, confidence: float
+    ) -> "Annotation":
+        return Annotation(
+            class_name=class_name,
+            bbox=bbox,
+            type=AnnotationType.PREDICTION,
+            confidence=confidence,
+        )
+
+    def __post_init__(self):
+        if self.type == AnnotationType.PREDICTION:
+            assert self.confidence is not None
 
 
 @dataclass
