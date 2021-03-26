@@ -1,14 +1,11 @@
+import itertools
+from collections import defaultdict
 from dataclasses import dataclass
-from typing import List
+from typing import Dict, List
 
 import numpy as np
 
-from .annotation import BBox, AnnotationType, AnnotatedImage
-
-
-@dataclass
-class Metrics:
-    iou_threshold: float
+from .annotation import Annotation, AnnotationType, BBox
 
 
 def iou(bb_a: BBox, bb_b: BBox) -> float:
@@ -48,12 +45,8 @@ def get_union_area(bb_a: BBox, bb_b: BBox, inter_area: float = None) -> float:
 
 
 def calculate_ap_every_point(recall: List, precision: List):
-    mrec = [0]
-    [mrec.append(e) for e in recall]
-    mrec.append(1)
-    mpre = [0]
-    [mpre.append(e) for e in precision]
-    mpre.append(0)
+    mrec = [0] + list(recall) + [1]
+    mpre = [0] + list(precision) + [0]
     for i in range(len(mpre) - 1, 0, -1):
         mpre[i - 1] = max(mpre[i - 1], mpre[i])
     ii = []
@@ -66,114 +59,162 @@ def calculate_ap_every_point(recall: List, precision: List):
     return [ap, mpre[0 : len(mpre) - 1], mrec[0 : len(mpre) - 1], ii]
 
 
-def get_metrics(annotated_images: List[AnnotatedImage], iou_threshold: float = 0.5):
-    ret = {}
+@dataclass(frozen=True)
+class ClassMetrics:
+    precision: List[float]
+    recall: List[float]
+    AP: float
+    interpolated_precision: List[float]
+    interpolated_recall: List[float]
+    total_GT: int
+    total_TP: int
+    total_FP: int
 
+
+@dataclass(frozen=True)
+class Metrics:
+    per_class: Dict[str, ClassMetrics]
+
+    @property
+    def mAP(self) -> float:
+        return float(np.mean([m.AP for m in self.per_class.values()]))
+
+
+def get_metrics_reference(
+    annotated_images: List[List[Annotation]], iou_threshold: float = 0.5
+) -> Metrics:
+    from src.bounding_box import BBFormat, BBType, BoundingBox
+    from src.evaluators import pascal_voc_evaluator
+
+    def to_bb(index: int, annotation: Annotation) -> BoundingBox:
+        image_id = str(index)
+        return BoundingBox(
+            image_name=image_id,
+            class_id=annotation.class_name,
+            coordinates=annotation.bbox.xywh(),
+            format=BBFormat.XYWH,
+            bb_type=BBType.GROUND_TRUTH
+            if annotation.type == AnnotationType.GROUND_TRUTH
+            else BBType.DETECTED,
+            confidence=annotation.confidence
+            if annotation.type == AnnotationType.PREDICTION
+            else None,
+        )
+
+    boxes = list(
+        itertools.chain.from_iterable(
+            [
+                [to_bb(index, ann) for ann in annotations]
+                for (index, annotations) in enumerate(annotated_images)
+            ]
+        )
+    )
+
+    gt_boxes = [box for box in boxes if box.get_bb_type() == BBType.GROUND_TRUTH]
+    det_boxes = [box for box in boxes if box.get_bb_type() == BBType.DETECTED]
+    metrics = pascal_voc_evaluator.get_pascalvoc_metrics(
+        gt_boxes, det_boxes, iou_threshold=iou_threshold
+    )
+    return Metrics(
+        per_class={
+            k: ClassMetrics(
+                precision=[float(v) for v in v["precision"]],
+                recall=[float(v) for v in v["recall"]],
+                AP=v["AP"],
+                interpolated_precision=v["interpolated precision"],
+                interpolated_recall=v["interpolated recall"],
+                total_GT=v["total positives"],
+                total_TP=int(v["total TP"]),
+                total_FP=int(v["total FP"]),
+            )
+            for (k, v) in metrics["per_class"].items()
+        }
+    )
+
+
+def get_metrics(annotated_images: List[List[Annotation]], iou_threshold: float = 0.5):
     # Structure bounding boxes per class and per annotation type
-    classes_bbs = {}  # structure {class_id: {gt: [], dt: []}}
-    gt_classes_only = []  # classes with at least one GT BB
-    detected_gt_per_image = {}  # {image_id: []} map
-    bb_images = {}  # {BBox: image_id} map
-    for annotated_image in annotated_images:
-        image_id = annotated_image.filename
-        n_gt = 0
-        for annotation in annotated_image.annotations:
-            class_id = annotation.class_name
-            if class_id not in classes_bbs:
-                classes_bbs[class_id] = {
-                    AnnotationType.GROUND_TRUTH: [],
-                    AnnotationType.PREDICTION: [],
-                }
-            annotation_type = annotation.annotation_type
-            if (
-                annotation_type == AnnotationType.GROUND_TRUTH
-                and class_id not in gt_classes_only
-            ):
-                gt_classes_only.append(class_id)
-            if annotation_type == AnnotationType.GROUND_TRUTH:
-                n_gt += 1
-            classes_bbs[class_id][annotation_type].append(annotation)
-            bb_images[annotation.bbox] = image_id
-        detected_gt_per_image[annotated_image.filename] = np.zeros(n_gt)
+    class_to_bb = defaultdict(
+        lambda: {
+            AnnotationType.GROUND_TRUTH: [],
+            AnnotationType.PREDICTION: [],
+        }
+    )
+    classes_with_gt = set()
+    annotation_to_image = {}
 
+    for (image_id, annotations) in enumerate(annotated_images):
+        for annotation in annotations:
+            if annotation.type == AnnotationType.GROUND_TRUTH:
+                classes_with_gt.add(annotation.class_name)
+            class_to_bb[annotation.class_name][annotation.type].append(annotation)
+
+            # Test that annotations are not duplicated
+            assert annotation not in annotation_to_image
+            annotation_to_image[annotation] = image_id
+
+    class_metrics = {}
     # Per class precision recall calculation
-    for class_id, class_annotations in classes_bbs.items():
-
-        # Skip for BBs with no GT
-        if class_id not in gt_classes_only:
-            continue
-
+    for class_id, class_annotations in class_to_bb.items():
         # Sort detections by decreasing confidence
         det_annotation_sorted = sorted(
             class_annotations[AnnotationType.PREDICTION],
-            key=lambda annotation: annotation.confidence,
+            key=lambda ann: ann.confidence,
             reverse=True,
         )
 
-        # Init TPs, FPs
         tp = np.zeros(len(det_annotation_sorted))
         fp = np.zeros(len(det_annotation_sorted))
 
-        # Loop through detections
-        for det_idx, det_annotation in enumerate(det_annotation_sorted):
-            image_id = bb_images[det_annotation.bbox]
+        class_gt_annotations = class_annotations[AnnotationType.GROUND_TRUTH]
+        matched_gts_per_image = defaultdict(set)
 
-            # Find ground truth image
-            gt_annotations = [
-                gt_annotation
-                for gt_annotation in class_annotations[AnnotationType.GROUND_TRUTH]
-                if bb_images[gt_annotation.bbox] == image_id
+        for det_idx, det_annotation in enumerate(det_annotation_sorted):
+            image_id = annotation_to_image[det_annotation]
+
+            # Find ground truth annotations for this image
+            image_gt_annotations = [
+                ann
+                for ann in class_gt_annotations
+                if annotation_to_image[ann] == image_id
             ]
+            if not image_gt_annotations:
+                fp[det_idx] = 1
+                continue
 
             # Get the maximum iou among all detections in the image
-            iou_max = -1.0
-            best_gt_annotation_idx = None
-            for gt_annotation_idx, gt_annotation in enumerate(gt_annotations):
-                iou_value = iou(det_annotation.bbox, gt_annotation.bbox)
-                if iou_value > iou_max:
-                    iou_max = iou_value
-                    best_gt_annotation_idx = gt_annotation_idx
+            ious = [iou(det_annotation.bbox, ann.bbox) for ann in image_gt_annotations]
+
+            iou_max = np.max(ious)
+            matched_gt = image_gt_annotations[int(np.argmax(ious))]
 
             # Assign detection as TP or FP
-            if iou_max >= iou_threshold:
-                # gt was not matched with any detection
-                if detected_gt_per_image[image_id][best_gt_annotation_idx] == 0:
-                    tp[det_idx] = 1  # detection is set as true positive
-                    detected_gt_per_image[image_id][
-                        best_gt_annotation_idx
-                    ] = 1  # set flag to identify gt as already 'matched'
-                    # print("TP")
-                else:
-                    fp[det_idx] = 1  # detection is set as false positive
-                    # print("FP")
+            if (
+                iou_max >= iou_threshold
+                and matched_gt not in matched_gts_per_image[image_id]
+            ):
+                tp[det_idx] = 1
+                matched_gts_per_image[image_id].add(matched_gt)
             else:
-                fp[det_idx] = 1  # detection is set as false positive
-                # print("FP")
+                fp[det_idx] = 1
 
-        # compute precision, recall and average precision
-        n_pos = len(class_annotations[AnnotationType.GROUND_TRUTH])
+        # Compute precision, recall and average precision
+        gt_count = len(class_gt_annotations)
         acc_fp = np.cumsum(fp)
         acc_tp = np.cumsum(tp)
-        rec = acc_tp / n_pos
-        precision = np.divide(acc_tp, (acc_fp + acc_tp))
+        recall = np.ones_like(acc_fp.shape) if gt_count == 0 else acc_tp / gt_count
+        precision = acc_tp / (acc_fp + acc_tp)
 
-        ap, mpre, mrec, _ = calculate_ap_every_point(rec, precision)
+        ap, mpre, mrec, _ = calculate_ap_every_point(recall, precision)
 
-        # add class result in the dictionary to be returned
-        ret[class_id] = {
-            "precision": precision,
-            "recall": rec,
-            "AP": ap,
-            "interpolated_precision": mpre,
-            "interpolated_recall": mrec,
-            "total_positives": n_pos,
-            "total_TP": np.sum(tp),
-            "total_FP": np.sum(fp),
-            "iou_threshold": iou_threshold,
-        }
-
-    # For mAP, only the classes in the gt set should be considered
-    mAP = sum([v["AP"] for k, v in ret.items() if k in gt_classes_only]) / len(
-        gt_classes_only
-    )
-    return {"per_class": ret, "mAP": mAP}
+        class_metrics[class_id] = ClassMetrics(
+            precision=[float(v) for v in precision],
+            recall=[float(v) for v in recall],
+            AP=ap,
+            interpolated_precision=mpre,
+            interpolated_recall=mrec,
+            total_GT=gt_count,
+            total_TP=int(np.sum(tp)),
+            total_FP=int(np.sum(fp)),
+        )
+    return Metrics(per_class=class_metrics)
