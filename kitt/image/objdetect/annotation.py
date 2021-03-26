@@ -1,9 +1,9 @@
+from dataclasses import dataclass
 from enum import Enum
-from typing import Tuple, Union, List
+from typing import List, Tuple, Union
 
 import numpy as np
 from PIL.Image import Image
-from dataclasses import dataclass
 
 
 @dataclass(frozen=True)
@@ -27,9 +27,25 @@ class BBoxBase:
     def __post_init__(self):
         if type(self) is BBoxBase:
             raise Exception("Please create either BBox or NormalizedBBox")
+        assert self.xmax > self.xmin
+        assert self.ymax > self.ymin
+
+    @staticmethod
+    def from_x1y1x2y2(x1: float, y1: float, x2: float, y2: float):
+        return BBox(xmin=x1, xmax=x2, ymin=y1, ymax=y2)
+
+    @staticmethod
+    def from_xywh(x: float, y: float, width: float, height: float):
+        return BBox(xmin=x, xmax=x + width, ymin=y, ymax=y + height)
 
     def as_tuple(self) -> Tuple[float, float, float, float]:
         return (self.xmin, self.xmax, self.ymin, self.ymax)
+
+    def x1y1x2y2(self) -> Tuple[float, float, float, float]:
+        return (self.xmin, self.ymin, self.xmax, self.ymax)
+
+    def xywh(self) -> Tuple[float, float, float, float]:
+        return (self.xmin, self.ymin, self.width, self.height)
 
     @property
     def width(self) -> float:
@@ -54,6 +70,9 @@ class BBoxBase:
     @property
     def area(self) -> float:
         return self.width * self.height
+
+    def move(self, x: float, y: float):
+        return BBox(self.xmin + x, self.xmax + x, self.ymin + y, self.ymax + y)
 
     def __repr__(self):
         return repr(self.as_tuple())
