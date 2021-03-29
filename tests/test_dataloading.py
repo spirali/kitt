@@ -4,9 +4,10 @@ import numpy as np
 import pytest
 
 from kitt.dataloading import (
-    BatchSequence,
+    BatchLoader,
     DataLoader,
     EagerLoader,
+    KerasSequence,
     ListDataLoader,
     MappingLoader,
 )
@@ -14,35 +15,34 @@ from kitt.dataloading import (
 
 @pytest.mark.parametrize("batch_size", range(1, 9))
 def test_batching(batch_size):
-    loader = ListDataLoader([(np.zeros((3, 3)), np.zeros((4, 2))) for _ in range(7)])
-    generator = BatchSequence(loader, batch_size)
+    loader = ListDataLoader(list(range(70)))
+    generator = BatchLoader(loader, batch_size)
 
     length = len(loader)
     assert len(generator) == math.ceil(length / batch_size)
 
     remaining = length
-    for (x, y) in generator:
+    for items in generator:
         expected_size = min(remaining, batch_size)
-        assert np.array(x).shape == (expected_size, 3, 3)
-        assert np.array(y).shape == (expected_size, 4, 2)
+        assert len(items) == expected_size
+        for item in items:
+            assert 0 <= item < 70
         remaining -= expected_size
 
 
 def test_batching_no_shuffle():
-    dataset = [(i, i + 1) for i in range(100)]
+    dataset = [i for i in range(100)]
 
     loader = ListDataLoader(dataset)
-    loader = BatchSequence(loader, batch_size=2, shuffle=False)
+    loader = BatchLoader(loader, batch_size=2, shuffle=False)
 
     def check():
-        for (index, (x, y)) in enumerate(loader):
-            assert x[0] == index * 2
-            assert x[1] == index * 2 + 1
-            assert y[0] == index * 2 + 1
-            assert y[1] == index * 2 + 2
+        for (index, batch) in enumerate(loader):
+            assert batch[0] == index * 2
+            assert batch[1] == index * 2 + 1
 
     check()
-    loader.on_epoch_end()
+    loader.reset()
     check()
 
 
@@ -53,10 +53,10 @@ def test_eager_loading():
         def __len__(self):
             return 5
 
-        def __getitem__(self, item):
+        def __getitem__(self, index):
             nonlocal load_count
             load_count += 1
-            return item
+            return index
 
     loader = Loader()
     loader = EagerLoader(loader)
@@ -79,3 +79,25 @@ def test_mapping():
 
     for (index, item) in enumerate(loader):
         assert (item == items[index] * 2).all()
+
+
+def test_keras_sequence():
+    items = [
+        (np.array([1, 2, 3]), np.array([1])),
+        (np.array([2, 2, 13]), np.array([2])),
+        (np.array([3, 3, 81]), np.array([3])),
+        (np.array([4, 5, 3]), np.array([4])),
+    ]
+
+    loader = ListDataLoader(items)
+    loader = BatchLoader(loader, batch_size=2)
+    sequence = KerasSequence(loader)
+
+    for (xs, ys) in sequence:
+        assert isinstance(xs, np.ndarray)
+        assert isinstance(ys, np.ndarray)
+        assert xs.shape == (2, 3)
+        assert ys.shape == (2, 1)
+
+        for (x, y) in zip(xs, ys):
+            assert x[0] == y[0]
