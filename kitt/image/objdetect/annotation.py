@@ -30,13 +30,13 @@ class BBoxBase:
         assert self.xmax > self.xmin
         assert self.ymax > self.ymin
 
-    @staticmethod
-    def from_x1y1x2y2(x1: float, y1: float, x2: float, y2: float):
-        return BBox(xmin=x1, xmax=x2, ymin=y1, ymax=y2)
+    @classmethod
+    def from_x1y1x2y2(cls, x1: float, y1: float, x2: float, y2: float):
+        return cls(xmin=x1, xmax=x2, ymin=y1, ymax=y2)
 
-    @staticmethod
-    def from_xywh(x: float, y: float, width: float, height: float):
-        return BBox(xmin=x, xmax=x + width, ymin=y, ymax=y + height)
+    @classmethod
+    def from_xywh(cls, x: float, y: float, width: float, height: float):
+        return cls(xmin=x, xmax=x + width, ymin=y, ymax=y + height)
 
     def as_tuple(self) -> Tuple[float, float, float, float]:
         return (self.xmin, self.xmax, self.ymin, self.ymax)

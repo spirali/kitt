@@ -48,3 +48,11 @@ def test_to_xywh():
     assert w == 1
     assert y == 10
     assert h == 20
+
+
+def test_class_constructor():
+    bbox = BBox.from_xywh(1, 1, 5, 5)
+    assert isinstance(bbox, BBox)
+
+    bbox = NormalizedBBox.from_xywh(0.1, 0.1, 0.5, 0.5)
+    assert isinstance(bbox, NormalizedBBox)
