@@ -26,6 +26,9 @@ def load_image(
     if pil_color_mode == "bgr":
         pil_color_mode = "rgb"
 
+    if target_size is not None:
+        target_size = target_size[::-1]
+
     pil = load_img(path, color_mode=pil_color_mode, target_size=target_size)
     image = np.array(pil)
     if color_mode == "bgr":

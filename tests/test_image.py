@@ -29,6 +29,11 @@ def test_load_image_resize():
     assert img.shape == (224, 224, 3)
 
 
+def test_load_image_resize_non_uniform():
+    img = load_image(data_path("example.jpeg"), target_size=(256, 512))
+    assert img.shape == (512, 256, 3)
+
+
 def test_load_image_normalize():
     img = load_image(data_path("example.jpeg"), normalize=True)
     assert np.max(img) <= 1.0
