@@ -66,8 +66,8 @@ def resize_if_needed(image: np.ndarray, target_size: ImageSize, keep_aspect_rati
         resized = resize_and_pad(image, target_size, pad_color, interpolation)
     else:
         resized = cv2.resize(image, target_size, interpolation)
-        if resized.ndim < image.ndim:
-            resized = np.expand_dims(resized, -1)
+    if resized.ndim < image.ndim:
+        resized = np.expand_dims(resized, -1)
     return resized
 
 
