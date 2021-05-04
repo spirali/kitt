@@ -135,10 +135,7 @@ def get_metrics_reference(
 def get_metrics(annotated_images: List[List[Annotation]], iou_threshold: float = 0.5):
     # Structure bounding boxes per class and per annotation type
     class_to_bb = defaultdict(
-        lambda: {
-            AnnotationType.GROUND_TRUTH: [],
-            AnnotationType.PREDICTION: [],
-        }
+        lambda: {AnnotationType.GROUND_TRUTH: [], AnnotationType.PREDICTION: [],}
     )
     classes_with_gt = set()
     annotation_to_image = {}

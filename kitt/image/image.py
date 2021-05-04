@@ -3,6 +3,7 @@ from typing import Iterable, Tuple, Union
 
 import cv2
 import numpy as np
+import math
 
 ImageSize = Tuple[int, int]
 
@@ -42,21 +43,83 @@ def create_empty_image_rgb(size: ImageSize) -> np.ndarray:
     return np.zeros((*size, 3), dtype=np.uint8)
 
 
-def resize_if_needed(image: np.ndarray, target_size: ImageSize) -> np.ndarray:
+def resize_if_needed(
+    image: np.ndarray,
+    target_size: ImageSize,
+    keep_aspect_ratio=False,
+    pad_color=(0, 0, 0),
+) -> np.ndarray:
     """Resizes an image if it is needed.
 
     :param image: (height, width, channels)
-    :param target_size: (width, height)"""
-    if np.any(target_size > image.shape[:2]):
-        logging.warning(f"Attempting to upsample from {image.shape} to {target_size}")
+    :param target_size: (width, height)
+    :param keep_aspect_ratio: True/False
+    :param pad_color: (R, G, B)/G"""
 
     size = image.shape[:2]
     if size == target_size[::-1]:
         return image
-    resized = cv2.resize(image, target_size)
+
+    h, w = image.shape[:2]
+    sw, sh = target_size
+    # interpolation method
+    if h > sh or w > sw:  # shrinking image
+        interpolation = cv2.INTER_AREA
+    else:  # stretching image
+        logging.warning(
+            f"Attempting to upsample from ({image.shape[1]},{image.shape[0]}) to {target_size}"
+        )
+        interpolation = cv2.INTER_CUBIC
+
+    if keep_aspect_ratio:
+        resized = resize_and_pad(image, target_size, pad_color, interpolation)
+    else:
+        resized = cv2.resize(image, target_size, interpolation)
     if resized.ndim < image.ndim:
         resized = np.expand_dims(resized, -1)
     return resized
+
+
+def resize_and_pad(img, size, pad_color, interpolation):
+    x, y = map(math.floor, size)
+    new_w, new_h = x, y
+    h, w = img.shape[:2]
+
+    def round_aspect(number, key):
+        return max(min(math.floor(number), math.ceil(number), key=key), 1)
+
+    # preserve aspect ratio
+    aspect = w / h
+    if x / y >= aspect:
+        x = round_aspect(y * aspect, key=lambda n: abs(aspect - n / y))
+    else:
+        y = round_aspect(x / aspect, key=lambda n: 0 if n == 0 else abs(aspect - x / n))
+    pad_height = abs(y - new_h)
+    pad_top = math.ceil(pad_height / 2)
+    pad_bot = pad_height - pad_top
+
+    pad_width = abs(x - new_w)
+    pad_left = math.ceil(pad_width / 2)
+    pad_right = pad_width - pad_left
+
+    # set pad color
+    if len(img.shape) == 3 and not isinstance(
+        pad_color, (list, tuple, np.ndarray)
+    ):  # color image but only one color provided
+        pad_color = [pad_color] * 3
+
+    # scale and pad
+    scaled_img = cv2.resize(img, (x, y), interpolation=interpolation)
+    scaled_img = cv2.copyMakeBorder(
+        scaled_img,
+        pad_top,
+        pad_bot,
+        pad_left,
+        pad_right,
+        borderType=cv2.BORDER_CONSTANT,
+        value=pad_color,
+    )
+    return scaled_img
 
 
 def display_image(image: np.ndarray, window="Kitt", wait=True):

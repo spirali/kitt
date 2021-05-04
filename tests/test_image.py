@@ -63,3 +63,48 @@ def test_resize_keep_last_dim():
     img = img.reshape((8, 4, 1))
     img2 = resize_if_needed(img, (8, 4))
     assert img2.shape == (4, 8, 1)
+
+
+def test_resize_keep_aspect_ratio_vertically_upsample():
+    img = np.zeros((8, 4))
+    color = 250
+    result_img = np.zeros((10, 4))
+    result_img[[0, -1]] = color
+    img2 = resize_if_needed(img, (4, 10), True, color)
+    assert np.array_equal(result_img, img2)
+
+
+def test_resize_keep_aspect_ratio_horizontally_upsample():
+    img = np.zeros((4, 8))
+    color = 250
+    result_img = np.zeros((4, 10))
+    result_img[:, [0, -1]] = color
+    img2 = resize_if_needed(img, (10, 4), True, color)
+    assert np.array_equal(result_img, img2)
+
+
+def test_resize_keep_aspect_ratio_vertically_downsample():
+    img = np.zeros((8, 4))
+    color = 250
+    result_img = np.zeros((4, 4))
+    result_img[:, [0, -1]] = color
+    img2 = resize_if_needed(img, (4, 4), True, color)
+    assert np.array_equal(result_img, img2)
+
+
+def test_resize_keep_aspect_ratio_horizontally_downsample():
+    img = np.zeros((4, 8))
+    color = 250
+    result_img = np.zeros((4, 4))
+    result_img[[0, -1]] = color
+    img2 = resize_if_needed(img, (4, 4), True, color)
+    assert np.array_equal(result_img, img2)
+
+
+def test_resize_keep_aspect_ratio_mixed_downsample():
+    img = np.zeros((4, 8))
+    color = 250
+    result_img = np.zeros((8, 4))
+    result_img[[0, 1, 2, -3, -2, -1]] = color
+    img2 = resize_if_needed(img, (4, 8), True, color)
+    assert np.array_equal(result_img, img2)

@@ -66,24 +66,10 @@ def test_overlay_empty_mask():
 
 
 def test_binarize_mask():
-    mask = np.array(
-        [
-            [0.4, 0.6, 1.0],
-            [0, 0.2, 0.1],
-            [0.8, 0.3, 0.5],
-        ]
-    )
+    mask = np.array([[0.4, 0.6, 1.0], [0, 0.2, 0.1], [0.8, 0.3, 0.5],])
     binarized = binarize_mask(mask, threshold=0.5)
     assert (
-        binarized
-        == np.array(
-            [
-                [0, 1, 1],
-                [0, 0, 0],
-                [1, 0, 0],
-            ],
-            dtype=np.float32,
-        )
+        binarized == np.array([[0, 1, 1], [0, 0, 0], [1, 0, 0],], dtype=np.float32,)
     ).all()
 
 
