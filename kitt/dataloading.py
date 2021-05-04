@@ -1,4 +1,5 @@
 import math
+from typing import Tuple
 
 import numpy as np
 from tensorflow.keras.utils import Sequence
@@ -40,6 +41,12 @@ class DataLoader:
         """Create a generator that iterate over the loader."""
         for item in (self[i] for i in range(len(self))):
             yield item
+
+    def split(self, test_ratio: float) -> Tuple["DataLoader", "DataLoader"]:
+        """
+        Splits the loader into two loaders, one with train data, and another one with test data.
+        """
+        raise NotImplementedError("This loader cannot be split")
 
 
 class ListDataLoader(DataLoader):
