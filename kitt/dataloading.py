@@ -6,6 +6,9 @@ from tensorflow.keras.utils import Sequence
 
 
 # Generic data loaders
+from kitt.data import train_test_split
+
+
 class DataLoader:
     """
     Loads individual items of a dataset.
@@ -68,6 +71,13 @@ class ListDataLoader(DataLoader):
 
     def __getitem__(self, index: int):
         return self.items[index]
+
+    def split(self, test_ratio: float) -> Tuple["DataLoader", "DataLoader"]:
+        train, test = train_test_split(list(self.items), test_ratio)
+        return (
+            ListDataLoader(train),
+            ListDataLoader(test)
+        )
 
 
 class LoaderWrapper(DataLoader):
