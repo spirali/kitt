@@ -18,7 +18,11 @@ def train_test_split(items: List, test_ratio: float) -> Tuple[List, List]:
     start_index = int(length * test_ratio)
     training_idx, test_idx = indices[start_index:], indices[:start_index]
 
-    items = np.array(items)
-    training = list(items[training_idx])
-    test = list(items[test_idx])
+    training = []
+    for index in training_idx:
+        training.append(items[index])
+
+    test = []
+    for index in test_idx:
+        test.append(items[index])
     return training, test
