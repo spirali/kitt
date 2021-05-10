@@ -3,7 +3,7 @@ from enum import Enum
 from typing import List, Tuple, Union
 
 import numpy as np
-from PIL.Image import Image
+from PIL import Image
 
 
 @dataclass(frozen=True)
@@ -147,20 +147,25 @@ class AnnotatedImage:
     Annotated image with a list of normalized bounding boxes.
     """
 
-    image: Union[Image, None]
+    image: Union[np.ndarray, None]
     filename: str
     annotations: List[Annotation]
 
     @property
     def width(self) -> int:
-        return self.image.width
+        return self.image.shape[1]
 
     @property
     def height(self) -> int:
-        return self.image.height
+        return self.image.shape[0]
 
     def to_numpy(self) -> np.ndarray:
-        return np.asarray(self.image)
+        return self.image
+
+    def to_pillow(self) -> Union[Image.Image, None]:
+        if self.image is not None:
+            return Image.fromarray(self.image.astype("uint8"))
+        return None
 
     def __repr__(self):
         return "{}: {}".format(self.filename, self.annotations)
