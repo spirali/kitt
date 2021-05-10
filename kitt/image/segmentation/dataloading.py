@@ -35,7 +35,7 @@ class SegmentationAugmentationLoader(LoaderWrapper):
         return next(flow)[0]
 
 
-class PatchingSamplerLoader(LoaderWrapper):
+class PatchSampler(LoaderWrapper):
     """
     Loader that wraps a segmentation loader and returns randomly cropped patches from it.
     Expects that the input loader returns tuples (image, label).
@@ -69,3 +69,30 @@ def get_image_size_from_loader(loader: DataLoader) -> ImageSize:
     image_size = get_image_size(image)
     assert image_size == get_image_size(mask)
     return image_size
+
+
+class FilteredPatchSampler(PatchSampler):
+    """
+    Loader that returns patches of input images and masks.
+    Filters patches where masks are black with a certain probability.
+    """
+
+    def __init__(
+        self, loader: DataLoader, size: int, stride: int, keep_black_probability: float
+    ):
+        super().__init__(loader, size, stride)
+        self.keep_black_probability = keep_black_probability
+        self.patch_indices = np.arange(0, self.patches_per_image)
+
+    def __getitem__(self, index):
+        x, y = self.loader[index]
+        np.random.shuffle(self.patch_indices)
+        for index in self.patch_indices:
+            y_patch = self.get_patch(y, index)
+            all_empty = np.all(y_patch == 0)
+            if all_empty and self.random.random() > self.keep_black_probability:
+                continue
+            x_patch = self.get_patch(x, index)
+            return x_patch, y_patch
+
+        return super().__getitem__(index)

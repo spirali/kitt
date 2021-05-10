@@ -1,9 +1,9 @@
 import logging
+import math
 from typing import Iterable, Tuple, Union
 
 import cv2
 import numpy as np
-import math
 
 ImageSize = Tuple[int, int]
 

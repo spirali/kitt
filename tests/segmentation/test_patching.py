@@ -1,10 +1,7 @@
 import numpy as np
 
 from kitt.dataloading import DataLoader
-from kitt.image.segmentation.dataloading import (
-    PatchingSamplerLoader,
-    SegmentationAugmentationLoader,
-)
+from kitt.image.segmentation.dataloading import FilteredPatchSampler, PatchSampler
 from kitt.image.segmentation.patching import get_patch, get_patches_per_dimension
 
 
@@ -47,45 +44,20 @@ def test_get_patch():
     ).all()
 
 
-def test_segmentation_loader_apply_same_augment():
-    class Loader(DataLoader):
-        def __len__(self):
-            return 2
+class Loader(DataLoader):
+    def __init__(self, images, masks):
+        assert len(images) == len(masks)
+        self.images = images
+        self.masks = masks
 
-        def __getitem__(self, item):
-            image = np.random.randn(3, 3, 3)
-            return image, image
+    def __len__(self):
+        return len(self.images)
 
-    loader = Loader()
-    loader = SegmentationAugmentationLoader(
-        loader,
-        dict(
-            rotation_range=10.0,
-            width_shift_range=0.02,
-            height_shift_range=0.02,
-            zoom_range=0.1,
-            horizontal_flip=True,
-            vertical_flip=True,
-            fill_mode="constant",
-        ),
-    )
-    for (x, y) in loader:
-        assert np.allclose(x, y)
+    def __getitem__(self, index):
+        return self.images[index], self.masks[index]
 
 
 def test_patching_loader():
-    class Loader(DataLoader):
-        def __init__(self, images, masks):
-            assert len(images) == len(masks)
-            self.images = images
-            self.masks = masks
-
-        def __len__(self):
-            return len(self.images)
-
-        def __getitem__(self, index):
-            return self.images[index], self.masks[index]
-
     items = []
     dim = 4
     count = dim * dim
@@ -116,9 +88,35 @@ def test_patching_loader():
     images = items[:4]
     masks = items[4:]
     loader = Loader(images, masks)
-    loader = PatchingSamplerLoader(loader, size=2, stride=2)
+    loader = PatchSampler(loader, size=2, stride=2)
     for (index, (x, y)) in enumerate(loader):
         assert x.shape == (2, 2)
         assert y.shape == (2, 2)
         assert contained_within(images[index], x)
         assert contained_within(masks[index], y)
+
+
+def test_filtered_patching_loader():
+    image = np.zeros((256, 256), dtype=np.uint8)
+    mask = np.zeros((256, 256), dtype=np.uint8)
+    mask[:128, :] = 255
+
+    loader = Loader([image], [mask])
+    filtered = FilteredPatchSampler(
+        loader, size=64, stride=64, keep_black_probability=0
+    )
+
+    for i in range(5):
+        for (x, y) in filtered:
+            assert not np.all(y == 0)
+
+    filtered = FilteredPatchSampler(
+        loader, size=64, stride=64, keep_black_probability=1
+    )
+    black_found = False
+    for i in range(10):
+        for (x, y) in filtered:
+            if np.all(y == 0):
+                black_found = True
+                break
+    assert black_found
