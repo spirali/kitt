@@ -32,8 +32,8 @@ def overlay_masks(background: np.ndarray, masks: List[np.ndarray], alpha=1.0):
     Alpha specifies how visible should the masks be.
     """
     for mask in masks:
-        indices = np.where(mask > 0)
-        if all(np.any(i) for i in indices):
+        indices = np.where(np.any(mask > 0, axis=2))
+        if indices[0].size:
             background[indices] = cv2.addWeighted(
                 background[indices], 1 - alpha, mask[indices], alpha, 0
             ).squeeze()
