@@ -6,7 +6,7 @@ import numpy as np
 from PIL.Image import Image
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=False)
 class BBoxBase:
     """
     Represents a base class for bounding boxes.
@@ -112,7 +112,7 @@ class AnnotationType(Enum):
 
 
 # Annotations need to be comparable by identity, not value
-@dataclass(frozen=True, eq=False)
+@dataclass(frozen=False, eq=False)
 class Annotation:
     class_name: str
     bbox: NormalizedBBox
