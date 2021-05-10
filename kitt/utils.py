@@ -22,3 +22,9 @@ def get_process_output(args) -> Union[str, None]:
 def get_extension(path: str) -> str:
     """Return the extension of a file path."""
     return os.path.splitext(path)[1]
+
+
+def clear_tf_memory():
+    from tensorflow import keras
+
+    keras.backend.clear_session()
