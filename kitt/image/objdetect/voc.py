@@ -6,10 +6,10 @@ from typing import Iterable
 
 import pandas as pd
 from pascal_voc_tools import XmlParser
-from PIL import Image
 
-from ...files import ensure_directory, iterate_directories
 from .annotation import AnnotatedImage, Annotation, BBox
+from ..image import load_image
+from ...files import ensure_directory, iterate_directories
 
 
 def load_voc_from_directories(
@@ -29,7 +29,7 @@ def load_voc_from_directories(
     return pd.DataFrame(items)
 
 
-def voc_to_annotated_image(path: str, load_image=True) -> AnnotatedImage:
+def voc_to_annotated_image(path: str, load_image_flag=True) -> AnnotatedImage:
     parser = XmlParser()
     content = parser.load(path)
 
@@ -71,9 +71,9 @@ def voc_to_annotated_image(path: str, load_image=True) -> AnnotatedImage:
         raise FileNotFoundError("Couldn't find image {}".format(filename))
     image = None
 
-    if load_image:
+    if load_image_flag:
         try:
-            image = Image.open(img_filename)
+            image = load_image(img_filename)
         except FileNotFoundError:
             raise FileNotFoundError("Couldn't load image {}".format(filename))
     return AnnotatedImage(image, img_filename, annotations)
@@ -95,7 +95,7 @@ def annotated_image_to_voc(path: str, image: AnnotatedImage):
 def _parse_dataset_item(path):
     file = os.path.abspath(path)
     try:
-        example = voc_to_annotated_image(file, load_image=False)
+        example = voc_to_annotated_image(file, load_image_flag=False)
         if len(example.annotations) == 0:
             logging.warning(f"Skipping {file} because it has no annotations")
             return None
