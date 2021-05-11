@@ -19,7 +19,7 @@ def load_image(
     :param path: Path to the image
     :param color_mode: "rgb", "bgr" or "grayscale"
     :param target_size: Target size of the image (width, height).
-    :param normalize: Normalize values to [0.0, [1.0]
+    :param normalize: Normalize values to [0.0, 1.0]
     """
     from tensorflow.keras.preprocessing.image import load_img
 
