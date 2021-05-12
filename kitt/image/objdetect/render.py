@@ -1,9 +1,9 @@
-from typing import List, Tuple
+from typing import List
 
 import cv2
 import numpy as np
 
-from .annotation import AnnotatedImage, Annotation, BBox
+from .annotation import AnnotatedImage, Annotation
 
 
 def render_annotated_image(
@@ -20,10 +20,7 @@ def render_annotated_image(
     return image
 
 
-def render_annotations(
-    image: np.ndarray,
-    annotations: List[Annotation]
-):
+def render_annotations(image: np.ndarray, annotations: List[Annotation]):
     """Renders bounding boxes onto an image, optionally with labels and probabilities."""
     for annotation in annotations:
         box = annotation.bbox.to_int()

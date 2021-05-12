@@ -24,6 +24,7 @@ class ImageLoader(ListDataLoader):
 
 def iterate_images(path: str):
     """Return an iterator that finds all JPG/PNG images under recursively the given path."""
+
     def filter_fn(p):
         return os.path.splitext(p)[1] in (".jpg", ".jpeg", ".png")
 

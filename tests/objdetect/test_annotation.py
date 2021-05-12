@@ -1,8 +1,9 @@
 import numpy as np
-from conftest import data_path
 
 from kitt.image.image import load_image
 from kitt.image.objdetect.annotation import AnnotatedImage
+
+from ..conftest import data_path
 
 
 def test_load_img_shape():

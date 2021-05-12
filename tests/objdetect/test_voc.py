@@ -1,7 +1,7 @@
-from conftest import data_path
-
 from kitt.image.objdetect.annotation import AnnotationType
 from kitt.image.objdetect.voc import voc_to_annotated_image
+
+from ..conftest import data_path
 
 
 def test_load_voc_xml():

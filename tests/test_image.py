@@ -1,9 +1,10 @@
 import cv2
 import numpy as np
-from conftest import check_image_equality, data_path
 
 from kitt.image.image import load_image, resize_if_needed
 from kitt.image.segmentation.image import polygons_to_binary_mask
+
+from .conftest import check_image_equality, data_path
 
 
 def test_load_image_rgb():

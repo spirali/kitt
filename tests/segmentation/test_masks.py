@@ -1,5 +1,4 @@
 import numpy as np
-from conftest import check_image_equality, data_path
 
 from kitt.image.image import load_image
 from kitt.image.segmentation.mask import (
@@ -7,6 +6,8 @@ from kitt.image.segmentation.mask import (
     color_bitmap_masks,
     overlay_masks,
 )
+
+from ..conftest import check_image_equality, data_path
 
 
 def test_color_bitmap_masks():

@@ -7,9 +7,9 @@ from typing import Iterable
 import pandas as pd
 from pascal_voc_tools import XmlParser
 
-from .annotation import AnnotatedImage, Annotation, BBox
-from ..image import load_image
 from ...files import ensure_directory, iterate_directories
+from ..image import load_image
+from .annotation import AnnotatedImage, Annotation, BBox
 
 
 def load_voc_from_directories(

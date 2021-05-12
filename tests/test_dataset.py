@@ -1,9 +1,10 @@
 import os
 
 import pandas as pd
-from conftest import data_path
 
 from kitt.dataset import assign_validation_split, load_dataset, split_dataset
+
+from .conftest import data_path
 
 
 def test_load_dataset():
