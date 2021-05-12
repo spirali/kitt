@@ -26,7 +26,8 @@ def iterate_directories(
     )
 
 
-def ensure_directory(path: str):
+def ensure_directory(path: str) -> str:
     if os.path.isfile(path) and not os.path.isdir(path):
         path = os.path.dirname(path)
     os.makedirs(path, exist_ok=True)
+    return path
