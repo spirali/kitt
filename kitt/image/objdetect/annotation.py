@@ -74,6 +74,24 @@ class BBoxBase:
     def move(self, x: float, y: float):
         return BBox(self.xmin + x, self.xmax + x, self.ymin + y, self.ymax + y)
 
+    def rescale_at_center(self, scale: float):
+        """
+        Scales the bounding box so that it is `scale`-times lager or smaller.
+        Its center will stay at the same position as before.
+        """
+        center = self.center
+        width = self.width * scale
+        height = self.height * scale
+        x = center[0] - width / 2
+        y = center[1] - height / 2
+        x2 = x + width
+        y2 = y + height
+        args = [self._clamp(v) for v in (x, y, x2, y2)]
+        return self.from_x1y1x2y2(*args)
+
+    def _clamp(self, value: float) -> float:
+        return value
+
     def __repr__(self):
         return repr(self.as_tuple())
 
@@ -104,6 +122,9 @@ class NormalizedBBox(BBoxBase):
         return BBox(
             self.xmin * width, self.xmax * width, self.ymin * height, self.ymax * height
         )
+
+    def _clamp(self, value: float) -> float:
+        return max(min(value, 1.0), 0.0)
 
 
 class AnnotationType(Enum):

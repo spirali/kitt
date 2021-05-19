@@ -1,3 +1,4 @@
+import numpy as np
 import pytest
 
 from kitt.image.objdetect.annotation import BBox, BBoxBase, NormalizedBBox
@@ -56,3 +57,16 @@ def test_class_constructor():
 
     bbox = NormalizedBBox.from_xywh(0.1, 0.1, 0.5, 0.5)
     assert isinstance(bbox, NormalizedBBox)
+
+
+def test_rescale_at_center():
+    bbox = BBox.from_xywh(100, 200, 50, 100)
+    assert bbox.rescale_at_center(2).xywh() == (75, 150, 100, 200)
+
+
+def test_rescale_at_center_normalized():
+    bbox = NormalizedBBox.from_x1y1x2y2(0.1, 0.2, 0.5, 0.3)
+    assert np.allclose(bbox.rescale_at_center(2).x1y1x2y2(), (0, 0.15, 0.7, 0.35))
+
+    bbox = NormalizedBBox.from_x1y1x2y2(0.2, 0.1, 0.3, 0.5)
+    assert np.allclose(bbox.rescale_at_center(2).x1y1x2y2(), (0.15, 0, 0.35, 0.7))
