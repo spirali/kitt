@@ -44,19 +44,28 @@ def get_union_area(bb_a: BBox, bb_b: BBox, inter_area: float = None) -> float:
     return float(area_a + area_b - inter_area)
 
 
+def to_float_list(items) -> List[float]:
+    return [float(v) for v in items]
+
+
 def calculate_ap_every_point(recall: List, precision: List):
-    mrec = [0] + list(recall) + [1]
-    mpre = [0] + list(precision) + [0]
+    mrec = [0.0] + list(recall) + [1.0]
+    mpre = [0.0] + list(precision) + [0.0]
     for i in range(len(mpre) - 1, 0, -1):
         mpre[i - 1] = max(mpre[i - 1], mpre[i])
     ii = []
     for i in range(len(mrec) - 1):
         if mrec[1:][i] != mrec[0:-1][i]:
             ii.append(i + 1)
-    ap = 0
+    ap = 0.0
     for i in ii:
         ap = ap + np.sum((mrec[i] - mrec[i - 1]) * mpre[i])
-    return [ap, mpre[0 : len(mpre) - 1], mrec[0 : len(mpre) - 1], ii]
+    return (
+        float(ap),
+        to_float_list(mpre[0 : len(mpre) - 1]),
+        to_float_list(mrec[0 : len(mpre) - 1]),
+        to_float_list(ii),
+    )
 
 
 @dataclass(frozen=True)
@@ -132,7 +141,9 @@ def get_metrics_reference(
     )
 
 
-def get_metrics(annotated_images: List[List[Annotation]], iou_threshold: float = 0.5):
+def get_metrics(
+    annotated_images: List[List[Annotation]], iou_threshold: float = 0.5
+) -> Metrics:
     # Structure bounding boxes per class and per annotation type
     class_to_bb = defaultdict(
         lambda: {
@@ -208,8 +219,8 @@ def get_metrics(annotated_images: List[List[Annotation]], iou_threshold: float =
         ap, mpre, mrec, _ = calculate_ap_every_point(recall, precision)
 
         class_metrics[class_id] = ClassMetrics(
-            precision=[float(v) for v in precision],
-            recall=[float(v) for v in recall],
+            precision=to_float_list(precision),
+            recall=to_float_list(recall),
             AP=ap,
             interpolated_precision=mpre,
             interpolated_recall=mrec,

@@ -1,3 +1,5 @@
+import numpy as np
+
 from kitt.image.objdetect.annotation import Annotation, BBox
 from kitt.image.objdetect.metrics import (
     boxes_intersect,
@@ -185,3 +187,27 @@ def test_per_class_map():
     assert metrics.per_class["a"].AP == 1
     assert metrics.per_class["b"].AP == 0
     assert metrics.mAP == 0.5
+
+
+def test_metrics_do_not_contain_numpy_type():
+    annotations = [
+        Annotation.ground_truth("a", BBox(0, 5, 0, 5)),
+        Annotation.prediction("a", BBox(0, 5, 0, 5), 0.9),
+        Annotation.ground_truth("b", BBox(0, 5, 0, 5)),
+        Annotation.prediction("b", BBox(5, 6, 5, 6), 0.9),
+    ]
+    metrics = get_metrics([annotations], iou_threshold=0.9)
+    assert not isinstance(metrics.mAP, np.floating)
+    for value in metrics.per_class.values():
+        for item in value.precision:
+            assert not isinstance(item, np.floating)
+        for item in value.recall:
+            assert not isinstance(item, np.floating)
+        for item in value.interpolated_precision:
+            assert not isinstance(item, np.floating)
+        for item in value.interpolated_recall:
+            assert not isinstance(item, np.floating)
+        assert not isinstance(value.AP, np.floating)
+        assert not isinstance(value.total_GT, np.integer)
+        assert not isinstance(value.total_TP, np.integer)
+        assert not isinstance(value.total_FP, np.integer)
