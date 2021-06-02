@@ -26,6 +26,18 @@ def test_denormalize_bbox():
     assert bbox.as_tuple() == (0, 100, 50, 75)
 
 
+def test_clip_bbox():
+    bbox = BBox(xmin=-10, xmax=50, ymin=-20, ymax=75)
+    bbox = bbox.clip(20, 30, 0, 0)
+    assert bbox.as_tuple() == (0, 20, 0, 30)
+    bbox = BBox(xmin=0, xmax=20, ymin=0, ymax=30)
+    bbox = bbox.clip(20, 30, 0, 0)
+    assert bbox.as_tuple() == (0, 20, 0, 30)
+    bbox = BBox(xmin=0, xmax=20, ymin=0, ymax=30)
+    bbox = bbox.clip(21, 31, 0, 0)
+    assert bbox.as_tuple() == (0, 20, 0, 30)
+
+
 def test_invalid_bbox():
     with pytest.raises(Exception):
         BBox(xmin=0, xmax=0, ymin=0.5, ymax=0.6)

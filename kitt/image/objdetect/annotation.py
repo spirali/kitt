@@ -97,6 +97,13 @@ class BBoxBase:
 
 
 class BBox(BBoxBase):
+    def clip(self, x_max, y_max, x_min=0, y_min=0) -> "BBox":
+        xmin = x_min if self.xmin < x_min else self.xmin
+        xmax = x_max if self.xmax > x_max else self.xmax
+        ymin = y_min if self.ymin < y_min else self.ymin
+        ymax = y_max if self.ymax > y_max else self.ymax
+        return BBox(xmin, xmax, ymin, ymax)
+
     def normalize(self, width: float, height: float) -> "NormalizedBBox":
         return NormalizedBBox(
             self.xmin / width, self.xmax / width, self.ymin / height, self.ymax / height
