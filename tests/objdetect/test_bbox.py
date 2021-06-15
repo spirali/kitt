@@ -27,7 +27,7 @@ def test_denormalize_bbox():
 
 
 def test_clip_bbox():
-    bbox = BBox(xmin=-10.3, xmax=50., ymin=-20.3, ymax=75.9)
+    bbox = BBox(xmin=-10.3, xmax=50.0, ymin=-20.3, ymax=75.9)
     bbox = bbox.clip(20, 30, 0, 0)
     assert bbox.as_tuple() == (0, 20, 0, 30)
     bbox = BBox(xmin=0, xmax=20, ymin=0, ymax=30)
