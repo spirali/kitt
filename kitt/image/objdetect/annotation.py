@@ -72,7 +72,16 @@ class BBoxBase:
         return self.width * self.height
 
     def move(self, x: float, y: float):
-        return BBox(self.xmin + x, self.xmax + x, self.ymin + y, self.ymax + y)
+        return self.from_x1y1x2y2(
+            self.xmin + x, self.ymin + y, self.xmax + x, self.ymax + y
+        )
+
+    def clip(self, x_max, y_max, x_min=0.0, y_min=0.0):
+        xmin = max(x_min, self.xmin)
+        xmax = min(x_max, self.xmax)
+        ymin = max(y_min, self.ymin)
+        ymax = min(y_max, self.ymax)
+        return self.from_x1y1x2y2(xmin, ymin, xmax, ymax)
 
     def rescale_at_center(self, scale: float):
         """
@@ -86,10 +95,10 @@ class BBoxBase:
         y = center[1] - height / 2
         x2 = x + width
         y2 = y + height
-        args = [self._clamp(v) for v in (x, y, x2, y2)]
+        args = [self._clip_dimension(v) for v in (x, y, x2, y2)]
         return self.from_x1y1x2y2(*args)
 
-    def _clamp(self, value: float) -> float:
+    def _clip_dimension(self, value: float) -> float:
         return value
 
     def __repr__(self):
@@ -97,13 +106,6 @@ class BBoxBase:
 
 
 class BBox(BBoxBase):
-    def clip(self, x_max, y_max, x_min=0., y_min=0.) -> "BBox":
-        xmin = max(x_min, self.xmin)
-        xmax = min(x_max, self.xmax)
-        ymin = max(y_min, self.ymin)
-        ymax = min(y_max, self.ymax)
-        return BBox(xmin, xmax, ymin, ymax)
-
     def normalize(self, width: float, height: float) -> "NormalizedBBox":
         return NormalizedBBox(
             self.xmin / width, self.xmax / width, self.ymin / height, self.ymax / height
@@ -130,7 +132,7 @@ class NormalizedBBox(BBoxBase):
             self.xmin * width, self.xmax * width, self.ymin * height, self.ymax * height
         )
 
-    def _clamp(self, value: float) -> float:
+    def _clip_dimension(self, value: float) -> float:
         return max(min(value, 1.0), 0.0)
 
 
