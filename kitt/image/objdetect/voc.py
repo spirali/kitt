@@ -8,8 +8,9 @@ import pandas as pd
 from pascal_voc_tools import XmlParser
 
 from ...files import ensure_directory, iterate_directories
+from ..image import get_image_size
 from ..image.tf import load_image
-from .annotation import AnnotatedImage, AnnotatedBBox
+from .annotation import AnnotatedBBox, AnnotatedImage
 from .bbox import BBox
 
 
@@ -34,7 +35,7 @@ def voc_to_annotated_image(path: str, load_image_flag=True) -> AnnotatedImage:
     parser = XmlParser()
     content = parser.load(path)
 
-    def parse_annotation(elem, width, height):
+    def parse_annotation(elem, width, height) -> AnnotatedBBox:
         name = elem["name"]
         bbox = elem["bndbox"]
         bbox = tuple(int(bbox[key]) for key in ("xmin", "xmax", "ymin", "ymax"))
@@ -61,7 +62,7 @@ def voc_to_annotated_image(path: str, load_image_flag=True) -> AnnotatedImage:
     filename = content["filename"]
     size = content["size"]
     width, height = (int(size[k]) for k in ("width", "height"))
-    annotations = tuple(
+    annotations = list(
         parse_annotation(obj, width, height) for obj in content["object"]
     )
 
@@ -75,9 +76,15 @@ def voc_to_annotated_image(path: str, load_image_flag=True) -> AnnotatedImage:
     if load_image_flag:
         try:
             image = load_image(img_filename)
+            assert get_image_size(image) == (width, height)
         except FileNotFoundError:
             raise FileNotFoundError("Couldn't load image {}".format(filename))
-    return AnnotatedImage(image, img_filename, annotations)
+    return AnnotatedImage(
+        annotations=annotations,
+        size=(width, height),
+        image=image,
+        filename=img_filename,
+    )
 
 
 def annotated_image_to_voc(path: str, image: AnnotatedImage):

@@ -2,7 +2,7 @@ import heapq
 import logging
 import os
 
-from tensorflow.python.keras.callbacks import Callback
+from tensorflow.keras.callbacks import Callback
 
 
 class ModelCheckpoint(Callback):

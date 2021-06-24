@@ -1,4 +1,4 @@
-from tensorflow.python.keras.applications.resnet import ResNet50
+from tensorflow.keras.applications.resnet import ResNet50
 
 from kitt.model import load_model_from_bytes, save_model_to_bytes
 
