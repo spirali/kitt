@@ -94,6 +94,12 @@ class BBoxBase:
         args = [self._clip_dimension(v) for v in (x, y, x2, y2)]
         return self.from_x1y1x2y2(*args)
 
+    def as_normalized(self, width: float, height: float) -> "NormalizedBBox":
+        raise NotImplementedError()
+
+    def as_denormalized(self, width: float, height: float) -> "BBox":
+        raise NotImplementedError()
+
     def _clip_dimension(self, value: float) -> float:
         return value
 
@@ -102,6 +108,12 @@ class BBoxBase:
 
 
 class BBox(BBoxBase):
+    def as_normalized(self, width: float, height: float) -> "NormalizedBBox":
+        return self.normalize(width, height)
+
+    def as_denormalized(self, width: float, height: float) -> "BBox":
+        return self
+
     def normalize(self, width: float, height: float) -> "NormalizedBBox":
         return NormalizedBBox(
             self.xmin / width, self.xmax / width, self.ymin / height, self.ymax / height
@@ -122,6 +134,12 @@ class NormalizedBBox(BBoxBase):
         assert 0 <= self.xmax <= 1
         assert 0 <= self.ymin <= 1
         assert 0 <= self.ymax <= 1
+
+    def as_normalized(self, width: float, height: float) -> "NormalizedBBox":
+        return self
+
+    def as_denormalized(self, width: float, height: float) -> "BBox":
+        return self.denormalize(width, height)
 
     def denormalize(self, width: float, height: float) -> "BBox":
         return BBox(

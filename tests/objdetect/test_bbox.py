@@ -82,3 +82,27 @@ def test_rescale_at_center_normalized():
 
     bbox = NormalizedBBox.from_x1y1x2y2(0.2, 0.1, 0.3, 0.5)
     assert np.allclose(bbox.rescale_at_center(2).x1y1x2y2(), (0.15, 0, 0.35, 0.7))
+
+
+def test_denormalized_as_normalized():
+    bbox = BBox.from_xywh(5, 10, 20, 50)
+    normalized = bbox.as_normalized(100, 100)
+    assert isinstance(normalized, NormalizedBBox)
+    assert normalized == bbox.normalize(100, 100)
+
+
+def test_denormalized_as_denormalized():
+    bbox = BBox.from_xywh(5, 10, 20, 50)
+    assert bbox.as_denormalized(100, 100) is bbox
+
+
+def test_normalized_as_normalized():
+    bbox = NormalizedBBox.from_x1y1x2y2(0.1, 0.5, 0.2, 0.8)
+    assert bbox.as_normalized(100, 100) is bbox
+
+
+def test_normalized_as_denormalized():
+    bbox = NormalizedBBox.from_x1y1x2y2(0.1, 0.5, 0.2, 0.8)
+    denormalized = bbox.as_denormalized(100, 100)
+    assert isinstance(denormalized, BBox)
+    assert denormalized == bbox.denormalize(100, 100)

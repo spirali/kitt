@@ -1,5 +1,5 @@
 import numpy as np
-from tensorflow.python.keras.utils.data_utils import Sequence
+from tensorflow.keras.utils import Sequence
 
 from . import DataLoader
 

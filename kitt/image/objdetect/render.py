@@ -3,7 +3,7 @@ from typing import List
 import cv2
 import numpy as np
 
-from .annotation import AnnotatedImage, AnnotatedBBox
+from .annotation import AnnotatedBBox, AnnotatedImage
 
 
 def render_annotated_image(
