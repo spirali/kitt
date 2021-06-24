@@ -9,7 +9,8 @@ from pascal_voc_tools import XmlParser
 
 from ...files import ensure_directory, iterate_directories
 from ..image.tf import load_image
-from .annotation import AnnotatedImage, Annotation, BBox
+from .annotation import AnnotatedImage, AnnotatedBBox
+from .bbox import BBox
 
 
 def load_voc_from_directories(
@@ -38,7 +39,7 @@ def voc_to_annotated_image(path: str, load_image_flag=True) -> AnnotatedImage:
         bbox = elem["bndbox"]
         bbox = tuple(int(bbox[key]) for key in ("xmin", "xmax", "ymin", "ymax"))
 
-        return Annotation(class_name=name, bbox=BBox(*bbox).normalize(width, height))
+        return AnnotatedBBox(class_name=name, bbox=BBox(*bbox).normalize(width, height))
 
     def find_image(directory, annotation_dir, filename):
         current_dir = annotation_dir

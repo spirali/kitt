@@ -1,7 +1,7 @@
 import numpy as np
 import pytest
 
-from kitt.image.objdetect.annotation import BBox, BBoxBase, NormalizedBBox
+from kitt.image.objdetect.bbox import BBox, BBoxBase, NormalizedBBox
 
 
 def test_create_invalid_normalized_bbox():

@@ -1,6 +1,7 @@
 import numpy as np
 
-from kitt.image.objdetect.annotation import Annotation, BBox
+from kitt.image.objdetect.annotation import AnnotatedBBox
+from kitt.image.objdetect.bbox import BBox
 from kitt.image.objdetect.metrics import (
     boxes_intersect,
     get_intersection_area,
@@ -88,7 +89,7 @@ def test_get_union_area():
 
 def test_metrics_missing_prediction():
     bb = BBox(0, 5, 0, 5).normalize(10, 10)
-    annotations = [Annotation.ground_truth("a", bb)]
+    annotations = [AnnotatedBBox.ground_truth("a", bb)]
     metrics = get_metrics([annotations])
     assert metrics.mAP == 0.0
 
@@ -96,9 +97,9 @@ def test_metrics_missing_prediction():
 def test_metrics_missing_gt():
     bb = BBox(0, 5, 0, 5).normalize(10, 10)
     annotations = [
-        Annotation.prediction("a", bb, 0.9),
-        Annotation.prediction("b", bb, 0.9),
-        Annotation.prediction("b", bb, 0.8),
+        AnnotatedBBox.prediction("a", bb, 0.9),
+        AnnotatedBBox.prediction("b", bb, 0.9),
+        AnnotatedBBox.prediction("b", bb, 0.8),
     ]
     metrics = get_metrics([annotations])
     assert metrics.per_class["a"].total_FP == 1
@@ -109,8 +110,8 @@ def test_metrics_missing_gt():
 def test_metrics_perfect_prediction():
     bb = BBox(0, 5, 0, 5).normalize(10, 10)
     annotations = [
-        Annotation.ground_truth("a", bb),
-        Annotation.prediction("a", bb, 0.9),
+        AnnotatedBBox.ground_truth("a", bb),
+        AnnotatedBBox.prediction("a", bb, 0.9),
     ]
     metrics = get_metrics([annotations])
     assert metrics.mAP == 1.0
@@ -120,12 +121,12 @@ def test_metrics_multiple_images_perfect_prediction():
     width, height = 10, 10
     bbox = BBox(0, 5, 0, 5).normalize(width, height)
     image_a = [
-        Annotation.ground_truth("a", bbox),
-        Annotation.prediction("a", bbox, 0.9),
+        AnnotatedBBox.ground_truth("a", bbox),
+        AnnotatedBBox.prediction("a", bbox, 0.9),
     ]
     image_b = [
-        Annotation.ground_truth("a", bbox),
-        Annotation.prediction("a", bbox, 0.9),
+        AnnotatedBBox.ground_truth("a", bbox),
+        AnnotatedBBox.prediction("a", bbox, 0.9),
     ]
     metrics = get_metrics([image_a, image_b])
     assert metrics.mAP == 1.0
@@ -135,9 +136,9 @@ def test_metrics_two_predictions_one_gt_1():
     width, height = 10, 10
     bbox = BBox(0, 2, 0, 2).normalize(width, height)
     annotations = [
-        Annotation.ground_truth("a", bbox),
-        Annotation.prediction("a", bbox, 0.5),
-        Annotation.prediction("a", bbox.move(0.5, 0.5), 0.9),
+        AnnotatedBBox.ground_truth("a", bbox),
+        AnnotatedBBox.prediction("a", bbox, 0.5),
+        AnnotatedBBox.prediction("a", bbox.move(0.5, 0.5), 0.9),
     ]
     metrics = get_metrics([annotations])
     assert metrics.per_class["a"].total_FP == 1
@@ -149,9 +150,9 @@ def test_metrics_two_predictions_one_gt_2():
     width, height = 10, 10
     bbox = BBox(0, 2, 0, 2).normalize(width, height)
     annotations = [
-        Annotation.ground_truth("a", bbox),
-        Annotation.prediction("a", bbox, 0.9),
-        Annotation.prediction("a", bbox.move(0.5, 0.5), 0.5),
+        AnnotatedBBox.ground_truth("a", bbox),
+        AnnotatedBBox.prediction("a", bbox, 0.9),
+        AnnotatedBBox.prediction("a", bbox.move(0.5, 0.5), 0.5),
     ]
     metrics = get_metrics([annotations])
     assert metrics.per_class["a"].total_FP == 1
@@ -162,8 +163,8 @@ def test_metrics_two_predictions_one_gt_2():
 def test_iou_threshold():
     bbox = BBox(0, 5, 0, 5)
     annotations = [
-        Annotation.ground_truth("a", bbox),
-        Annotation.prediction("a", bbox.move(2.5, 0), 0.9),
+        AnnotatedBBox.ground_truth("a", bbox),
+        AnnotatedBBox.prediction("a", bbox.move(2.5, 0), 0.9),
     ]
     metrics = get_metrics([annotations], iou_threshold=0.9)
     assert metrics.per_class["a"].total_FP == 1
@@ -178,10 +179,10 @@ def test_iou_threshold():
 
 def test_per_class_map():
     annotations = [
-        Annotation.ground_truth("a", BBox(0, 5, 0, 5)),
-        Annotation.prediction("a", BBox(0, 5, 0, 5), 0.9),
-        Annotation.ground_truth("b", BBox(0, 5, 0, 5)),
-        Annotation.prediction("b", BBox(5, 6, 5, 6), 0.9),
+        AnnotatedBBox.ground_truth("a", BBox(0, 5, 0, 5)),
+        AnnotatedBBox.prediction("a", BBox(0, 5, 0, 5), 0.9),
+        AnnotatedBBox.ground_truth("b", BBox(0, 5, 0, 5)),
+        AnnotatedBBox.prediction("b", BBox(5, 6, 5, 6), 0.9),
     ]
     metrics = get_metrics([annotations], iou_threshold=0.9)
     assert metrics.per_class["a"].AP == 1
@@ -191,10 +192,10 @@ def test_per_class_map():
 
 def test_metrics_do_not_contain_numpy_type():
     annotations = [
-        Annotation.ground_truth("a", BBox(0, 5, 0, 5)),
-        Annotation.prediction("a", BBox(0, 5, 0, 5), 0.9),
-        Annotation.ground_truth("b", BBox(0, 5, 0, 5)),
-        Annotation.prediction("b", BBox(5, 6, 5, 6), 0.9),
+        AnnotatedBBox.ground_truth("a", BBox(0, 5, 0, 5)),
+        AnnotatedBBox.prediction("a", BBox(0, 5, 0, 5), 0.9),
+        AnnotatedBBox.ground_truth("b", BBox(0, 5, 0, 5)),
+        AnnotatedBBox.prediction("b", BBox(5, 6, 5, 6), 0.9),
     ]
     metrics = get_metrics([annotations], iou_threshold=0.9)
     assert not isinstance(metrics.mAP, np.floating)
