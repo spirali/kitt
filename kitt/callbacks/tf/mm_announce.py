@@ -1,9 +1,7 @@
-import contextlib
 import getpass
 import logging
 import math
 import os
-import socket
 import sys
 import time
 
@@ -11,40 +9,8 @@ import requests
 from tensorflow import keras
 
 
-@contextlib.contextmanager
-def announce_computation(priority="normal"):
-    url = get_announce_url()
-    if not is_announce_enabled():
-        url = None
-
-    def send(message):
-        if url:
-            send_mattermost_message(message, url)
-
-    user = getpass.getuser()
-    device = socket.gethostname()
-    send(f"{user} started computing on {device} (priority={priority}) :cat:")
-
-    def finished():
-        send(f"{user} finished computing on {device} :tada:")
-
-    try:
-        yield
-        finished()
-    except BaseException as e:
-        if isinstance(e, KeyboardInterrupt):
-            finished()
-        else:
-            send(f"{user}'s computation crashed :scream_cat:")
-        raise e
-
-
 def is_announce_enabled():
     return "NO_ANNOUNCE" not in os.environ
-
-
-def get_announce_url():
-    return os.environ.get("MM_ANNOUNCE_URL")
 
 
 def get_status_url():
@@ -63,6 +29,7 @@ class AnnounceProgressCallback(keras.callbacks.Callback):
         """
         :param nth_epoch: Announce only every n-th epoch
         """
+        super().__init__()
         self.epoch_start_time = 0
         self.nth_epoch = nth_epoch
 

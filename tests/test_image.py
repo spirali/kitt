@@ -1,7 +1,8 @@
 import cv2
 import numpy as np
 
-from kitt.image.image import load_image, resize_if_needed
+from kitt.image.image import resize_if_needed
+from kitt.image.image.tf import load_image
 from kitt.image.segmentation.image import polygons_to_binary_mask
 
 from .conftest import check_image_equality, data_path

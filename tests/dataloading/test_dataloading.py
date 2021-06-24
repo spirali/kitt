@@ -7,10 +7,10 @@ from kitt.dataloading import (
     BatchLoader,
     DataLoader,
     EagerLoader,
-    KerasSequence,
     ListDataLoader,
     MappingLoader,
 )
+from kitt.dataloading.tf import KerasSequence
 
 
 @pytest.mark.parametrize("batch_size", range(1, 9))

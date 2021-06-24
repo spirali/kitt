@@ -8,7 +8,7 @@ ROOT_DIR = TEST_DIR.parent
 
 sys.path.insert(0, str(ROOT_DIR))
 
-from kitt.image.image import load_image  # noqa
+from kitt.image.image.tf import load_image  # noqa
 
 
 def data_path(path: str) -> str:

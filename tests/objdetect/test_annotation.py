@@ -1,6 +1,6 @@
 import numpy as np
 
-from kitt.image.image import load_image
+from kitt.image.image.tf import load_image
 from kitt.image.objdetect.annotation import AnnotatedImage
 
 from ..conftest import data_path
