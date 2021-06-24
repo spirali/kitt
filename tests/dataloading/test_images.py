@@ -1,7 +1,7 @@
 import numpy as np
 
 from kitt.image.dataloading import ImageLoader, iterate_images
-from kitt.image.image import load_image
+from kitt.image.image.tf import load_image
 
 from ..conftest import data_path
 

@@ -2,8 +2,9 @@ import numpy as np
 from tensorflow import keras
 from tensorflow.keras.layers import Dense
 
-from kitt.dataloading import BatchLoader, KerasSequence, ListDataLoader
+from kitt.dataloading import BatchLoader, ListDataLoader
 from kitt.dataloading.preprocessing import Preprocessing, ScalePreprocessing
+from kitt.dataloading.tf import KerasSequence
 from kitt.model import ModelWrapper
 
 

@@ -1,9 +1,9 @@
 import os
 from typing import List
 
-from kitt.dataloading import ListDataLoader
-from kitt.files import iterate_files
-from kitt.image.image import load_image
+from ..dataloading import ListDataLoader
+from ..files import iterate_files
+from .image.tf import load_image
 
 
 class ImageLoader(ListDataLoader):

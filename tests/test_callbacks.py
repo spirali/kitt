@@ -4,7 +4,7 @@ import numpy as np
 from tensorflow.keras import Input, Sequential
 from tensorflow.keras.layers import Dense
 
-from kitt.callbacks import ModelCheckpoint
+from kitt.callbacks.tf.model_checkpoint import ModelCheckpoint
 
 
 def create_model():

@@ -1,6 +1,6 @@
 import numpy as np
 
-from kitt.image.image import load_image
+from kitt.image.image.tf import load_image
 from kitt.image.segmentation.mask import (
     binarize_mask,
     color_bitmap_masks,

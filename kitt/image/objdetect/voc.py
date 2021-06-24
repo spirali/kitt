@@ -8,7 +8,7 @@ import pandas as pd
 from pascal_voc_tools import XmlParser
 
 from ...files import ensure_directory, iterate_directories
-from ..image import load_image
+from ..image.tf import load_image
 from .annotation import AnnotatedImage, Annotation, BBox
 
 
