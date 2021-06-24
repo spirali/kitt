@@ -5,7 +5,8 @@ from typing import Dict, List
 
 import numpy as np
 
-from .annotation import Annotation, AnnotationType, BBox
+from .annotation import AnnotatedBBox, AnnotationType
+from .bbox import BBox
 
 
 def iou(bb_a: BBox, bb_b: BBox) -> float:
@@ -90,12 +91,12 @@ class Metrics:
 
 
 def get_metrics_reference(
-    annotated_images: List[List[Annotation]], iou_threshold: float = 0.5
+    annotated_images: List[List[AnnotatedBBox]], iou_threshold: float = 0.5
 ) -> Metrics:
     from src.bounding_box import BBFormat, BBType, BoundingBox
     from src.evaluators import pascal_voc_evaluator
 
-    def to_bb(index: int, annotation: Annotation) -> BoundingBox:
+    def to_bb(index: int, annotation: AnnotatedBBox) -> BoundingBox:
         image_id = str(index)
         return BoundingBox(
             image_name=image_id,
@@ -142,7 +143,7 @@ def get_metrics_reference(
 
 
 def get_metrics(
-    annotated_images: List[List[Annotation]], iou_threshold: float = 0.5
+    annotated_images: List[List[AnnotatedBBox]], iou_threshold: float = 0.5
 ) -> Metrics:
     # Structure bounding boxes per class and per annotation type
     class_to_bb = defaultdict(
