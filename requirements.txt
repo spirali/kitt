@@ -7,7 +7,7 @@ pascal-voc-tools==0.1.29
 matplotlib>=3
 seaborn>=0.10
 requests>=2.24
-keras>=2.4,<2.5
+keras>=2.4
 tensorflow>=2.3
 pyyaml>=5
 dacite==1.6.0

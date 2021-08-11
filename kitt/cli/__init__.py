@@ -9,6 +9,9 @@ class Resolution(click.ParamType):
     name = "resolution"
 
     def convert(self, value, param, ctx):
+        if isinstance(value, tuple) and len(value) == 2 and all(isinstance(v, int) for v in value):
+            return value
+
         try:
             parts = value.split(",")
             if len(parts) != 2:
