@@ -120,3 +120,15 @@ def test_filtered_patching_loader():
                 black_found = True
                 break
     assert black_found
+
+
+def test_filtered_patching_loader_all_black():
+    image = np.zeros((256, 256), dtype=np.uint8)
+    mask = np.zeros((256, 256), dtype=np.uint8)
+
+    loader = Loader([image], [mask])
+    filtered = FilteredPatchSampler(
+        loader, size=64, stride=64, keep_black_probability=0
+    )
+    for (x, y) in filtered:
+        assert np.all(y == 0)

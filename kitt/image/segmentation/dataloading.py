@@ -87,12 +87,12 @@ class FilteredPatchSampler(PatchSampler):
     def __getitem__(self, index):
         x, y = self.loader[index]
         np.random.shuffle(self.patch_indices)
-        for index in self.patch_indices:
-            y_patch = self.get_patch(y, index)
+        for patch_index in self.patch_indices:
+            y_patch = self.get_patch(y, patch_index)
             all_empty = np.all(y_patch == 0)
             if all_empty and self.random.random() > self.keep_black_probability:
                 continue
-            x_patch = self.get_patch(x, index)
+            x_patch = self.get_patch(x, patch_index)
             return x_patch, y_patch
 
         return super().__getitem__(index)
