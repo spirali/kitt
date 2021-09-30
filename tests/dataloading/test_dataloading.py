@@ -9,6 +9,7 @@ from kitt.dataloading import (
     EagerLoader,
     ListDataLoader,
     MappingLoader,
+    ZipLoader,
 )
 from kitt.dataloading.tf import KerasSequence
 
@@ -79,6 +80,28 @@ def test_mapping():
 
     for (index, item) in enumerate(loader):
         assert (item == items[index] * 2).all()
+
+
+def test_zip_iterate():
+    items = [
+        np.array([1, 2, 3]),
+        np.array([50, 2, 13]),
+        np.array([8, 3, 81]),
+        np.array([10, 5, 3]),
+        np.array([51, 4, 2]),
+    ]
+
+    a = ListDataLoader(items)
+    b = list(range(len(items)))
+
+    for (item, index) in ZipLoader(a, b):
+        assert (item == items[index]).all()
+
+
+def test_zip_length():
+    loader = ZipLoader([1, 2, 3], ["a", "b"], [True])
+    assert len(loader) == 1
+    assert list(loader) == [(1, "a", True)]
 
 
 def test_keras_sequence():

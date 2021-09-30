@@ -138,6 +138,22 @@ class MappingLoader(LoaderWrapper):
         return self.map_fn(self.loader[index])
 
 
+class ZipLoader(DataLoader):
+    def __init__(self, *loaders):
+        assert len(loaders) > 0
+        self.loaders = loaders
+
+    def __getitem__(self, item):
+        return tuple(loader[item] for loader in self.loaders)
+
+    def __len__(self):
+        return min(len(loader) for loader in self.loaders)
+
+    def reset(self):
+        for loader in self.loaders:
+            loader.reset()
+
+
 class BatchIndexer:
     def __init__(self, length: int, batch_size: int, seed=None, shuffle=True):
         assert batch_size > 0
