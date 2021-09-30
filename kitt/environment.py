@@ -120,7 +120,7 @@ def get_constructor_arguments():
 DESCRIPTOR_CLONERS = {"stdout": None, "stderr": None}
 
 
-def clone_descriptor(descriptor, path: str):
+def clone_descriptor(descriptor: str, path: str):
     """
     Clones the output of the specified descriptor ("stdout" or "stderr") into the
     specified file.
