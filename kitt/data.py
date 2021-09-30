@@ -26,3 +26,12 @@ def train_test_split(items: List, test_ratio: float) -> Tuple[List, List]:
     for index in test_idx:
         test.append(items[index])
     return training, test
+
+
+def to_onehot(value: int, dimension: int) -> np.array:
+    """
+    Creates a one-hot vector of size `dimension`, with `value` index set to 1.
+    """
+    vec = np.zeros(dimension, dtype=np.float32)
+    vec[value] = 1
+    return vec
