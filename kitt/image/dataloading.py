@@ -13,13 +13,17 @@ class ImageLoader(ListDataLoader):
     Returns pairs (image_path, image_data).
     """
 
-    def __init__(self, paths: List[str], **load_image_args):
+    def __init__(self, paths: List[str], with_path=True, **load_image_args):
         super().__init__(paths)
         self.load_image_args = load_image_args
+        self.with_path = with_path
 
     def __getitem__(self, index):
         path = super().__getitem__(index)
-        return (path, load_image(path, **self.load_image_args))
+        image = load_image(path, **self.load_image_args)
+        if self.with_path:
+            return (path, image)
+        return image
 
 
 def iterate_images(path: str):

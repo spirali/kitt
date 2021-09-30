@@ -33,3 +33,17 @@ def test_image_loader():
     for (image_path, (path, img)) in zip(images, loader):
         assert image_path == path
         assert np.all(load_image(path) == img)
+
+
+def test_image_loader_no_paths():
+    images = [
+        data_path("dataset/1.jpeg"),
+        data_path("dataset/2.jpeg"),
+        data_path("dataset/3.jpeg"),
+    ]
+
+    loader = ImageLoader(images, with_path=False)
+    assert len(loader) == len(images)
+
+    for (image_path, img) in zip(images, loader):
+        assert np.all(load_image(image_path) == img)

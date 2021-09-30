@@ -3,8 +3,8 @@ from typing import List
 import cv2
 import numpy as np
 
-from .annotation import AnnotatedBBox, AnnotationType
 from ..image import get_image_size
+from .annotation import AnnotatedBBox, AnnotationType
 
 
 def render_annotations(image: np.ndarray, annotations: List[AnnotatedBBox]):

@@ -5,8 +5,8 @@ from typing import List, Optional, Union
 import numpy as np
 from PIL import Image
 
-from .bbox import BBoxBase
 from ..image import ImageSize, get_image_size
+from .bbox import BBoxBase
 
 
 class AnnotationType(Enum):
@@ -30,7 +30,7 @@ class AnnotatedBBox:
 
     @staticmethod
     def prediction(
-            class_name: str, bbox: BBoxBase, confidence: float
+        class_name: str, bbox: BBoxBase, confidence: float
     ) -> "AnnotatedBBox":
         return AnnotatedBBox(
             class_name=class_name,
@@ -56,10 +56,13 @@ class AnnotatedImage:
     filename: Optional[str] = None
 
     @staticmethod
-    def from_image(image: np.ndarray, annotations: List[AnnotatedBBox] = None,
-                   filename: str = None):
+    def from_image(
+        image: np.ndarray, annotations: List[AnnotatedBBox] = None, filename: str = None
+    ):
         size = get_image_size(image)
-        return AnnotatedImage(image=image, size=size, annotations=annotations, filename=filename)
+        return AnnotatedImage(
+            image=image, size=size, annotations=annotations, filename=filename
+        )
 
     def __post_init__(self):
         self.annotations = self.annotations or []
