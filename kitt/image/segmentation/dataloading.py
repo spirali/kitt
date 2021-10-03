@@ -1,38 +1,26 @@
 from random import Random
 
 import numpy as np
-from tensorflow.keras.preprocessing.image import ImageDataGenerator
 
 from ...dataloading import DataLoader, LoaderWrapper
+from ..dataloading import ImageAugmentationLoader
 from ..image import ImageSize, get_image_size
 from .patching import get_patch, get_patches_per_dimension
 
 
-class SegmentationAugmentationLoader(LoaderWrapper):
+class SegmentationAugmentationLoader(ImageAugmentationLoader):
     def __init__(self, loader: DataLoader, augmentation_args, seed=None):
         """
         Loader that wraps another loader and augments both inputs and labels using
         keras.ImageDataGenerator.
 
-        Expects that the input loader returns tuples (input, label).
         Intended for image-to-image segmentation tasks.
 
         :param augmentation_args: constructor arguments for keras.ImageDataGenerator
         """
-        super().__init__(loader)
-        self.seed = seed or 0
-        self.augmentator = ImageDataGenerator(**augmentation_args)
-
-    def __getitem__(self, index):
-        self.seed += 1
-        x, y = self.loader[index]
-        return self._augment_image(x), self._augment_image(y)
-
-    def _augment_image(self, image):
-        assert image.ndim == 3
-        image = np.expand_dims(image, axis=0)
-        flow = self.augmentator.flow(image, batch_size=1, seed=self.seed, shuffle=False)
-        return next(flow)[0]
+        super().__init__(
+            loader, augmentation_args=augmentation_args, seed=seed, augment_label=True
+        )
 
 
 class PatchSampler(LoaderWrapper):
