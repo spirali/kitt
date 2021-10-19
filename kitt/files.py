@@ -30,4 +30,4 @@ def ensure_directory(path: str) -> str:
     if os.path.isfile(path) and not os.path.isdir(path):
         path = os.path.dirname(path)
     os.makedirs(path, exist_ok=True)
-    return path
+    return os.path.abspath(path)
