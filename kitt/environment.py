@@ -9,6 +9,7 @@ from datetime import datetime
 
 from yaml import SafeDumper
 
+from .files import GenericPath
 from .utils import get_extension, get_process_output
 
 
@@ -28,7 +29,7 @@ def write_yaml(object, stream):
     yaml.dump(object, stream, Dumper=CustomDumper)
 
 
-def write_environment_yaml(path: str, **kwargs):
+def write_environment_yaml(path: GenericPath, **kwargs):
     """Store information about the environment into the passed YAML file"""
     assert get_extension(path) in (".yml", ".yaml")
 
