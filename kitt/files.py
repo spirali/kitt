@@ -1,6 +1,7 @@
 import glob
 import itertools
 import os
+from pathlib import Path
 from typing import Iterable, Union
 
 
@@ -26,8 +27,11 @@ def iterate_directories(
     )
 
 
-def ensure_directory(path: str) -> str:
+GenericPath = Union[Path, str]
+
+
+def ensure_directory(path: GenericPath) -> Path:
     if os.path.isfile(path) and not os.path.isdir(path):
         path = os.path.dirname(path)
     os.makedirs(path, exist_ok=True)
-    return os.path.abspath(path)
+    return Path(path).absolute()
