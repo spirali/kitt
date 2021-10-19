@@ -20,5 +20,9 @@ def get_process_output(args) -> Union[str, None]:
 
 
 def get_extension(path: str) -> str:
-    """Return the extension of a file path."""
+    """
+    Return the extension of a file path.
+
+    The extension will include the dot.
+    """
     return os.path.splitext(path)[1]
