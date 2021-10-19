@@ -1,8 +1,11 @@
 import heapq
 import logging
 import os
+from typing import List
 
 from tensorflow.keras.callbacks import Callback
+
+from ...utils import get_extension
 
 
 class ModelCheckpoint(Callback):
@@ -26,6 +29,12 @@ class ModelCheckpoint(Callback):
         :param save_optimizer: Include optimizer state in the saved model checkpoint.
         """
         super().__init__()
+
+        if os.path.isdir(filepath) or get_extension(filepath) != ".hdf5":
+            raise Exception(
+                "Please use a placeholder path ending with .hdf5 in `filepath`"
+            )
+
         self.filepath = str(filepath)
         self.monitor = monitor
         self.save_n_best = save_n_best or 0
@@ -47,6 +56,9 @@ class ModelCheckpoint(Callback):
         # self.best_queue[0] is the worst saved model
         # self.best_queue[-1] is the best saved model
         self.best_queue = []
+
+    def saved_models(self) -> List[str]:
+        return [item[2] for item in self.best_queue]
 
     def on_epoch_end(self, epoch, logs=None):
         self.epochs_since_save += 1
