@@ -13,7 +13,8 @@ class ImageLoader(ListDataLoader):
     """
     Loads images using the `load_image` function.
 
-    Returns pairs (image_path, image_data).
+    If `with_path` is True, returns pairs (image_path, image_data).
+    Otherwise only image data is returned.
     """
 
     def __init__(self, paths: List[str], with_path=True, **load_image_args):
