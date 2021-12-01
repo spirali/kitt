@@ -1,6 +1,6 @@
 import numpy as np
 
-from ..image import get_image_size
+from ..image import ImageSize, get_image_size
 
 
 def get_patches_per_dimension(dimension: int, size: int, stride: int) -> int:
@@ -12,6 +12,14 @@ def get_patches_per_dimension(dimension: int, size: int, stride: int) -> int:
 
     overlapping = (size // stride) - 1 if stride != size else 0
     return (dimension // stride) - overlapping
+
+
+def get_patches_per_image(
+    image_size: ImageSize, patch_size: ImageSize, patch_stride: ImageSize
+) -> int:
+    return get_patches_per_dimension(
+        image_size[0], patch_size[0], patch_stride[0]
+    ) * get_patches_per_dimension(image_size[1], patch_size[1], patch_stride[1])
 
 
 def get_patch(

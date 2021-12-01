@@ -9,9 +9,7 @@ def test_gpu_trainer_train(num_gpus):
     trainer = GPUTrainer(num_gpus=num_gpus)
 
     with trainer:
-        model = keras.Sequential([
-            keras.layers.Dense(4)
-        ])
+        model = keras.Sequential([keras.layers.Dense(4)])
         model.compile(optimizer="adam", loss="mse")
 
     model.fit([[1], [2], [3]], [3, 4, 5], batch_size=trainer.batch_size(32))

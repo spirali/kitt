@@ -5,7 +5,7 @@ import numpy as np
 from ...dataloading import DataLoader, LoaderWrapper
 from ..dataloading import ImageAugmentationLoader
 from ..image import ImageSize, get_image_size
-from .patching import get_patch, get_patches_per_dimension
+from .patching import get_patch, get_patches_per_image
 
 
 class SegmentationAugmentationLoader(ImageAugmentationLoader):
@@ -34,9 +34,9 @@ class PatchSampler(LoaderWrapper):
         self.image_size = get_image_size_from_loader(loader)
         self.size = size
         self.stride = stride
-        self.patches_per_image = get_patches_per_dimension(
-            self.image_size[0], self.size, self.stride
-        ) * get_patches_per_dimension(self.image_size[1], self.size, self.stride)
+        self.patches_per_image = get_patches_per_image(
+            self.image_size, (self.size, self.size), (self.stride, self.stride)
+        )
         self.random = Random()
 
     def get_patch(self, image: np.ndarray, index: int) -> np.ndarray:
