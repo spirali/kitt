@@ -1,4 +1,5 @@
-from random import Random
+import random
+from typing import Tuple
 
 import numpy as np
 
@@ -23,9 +24,9 @@ class SegmentationAugmentationLoader(ImageAugmentationLoader):
         )
 
 
-class PatchSampler(LoaderWrapper):
+class PatchLoader(LoaderWrapper):
     """
-    Loader that wraps a segmentation loader and returns randomly cropped patches from it.
+    Loader that wraps a segmentation loader and returns all patches from it.
     Expects that the input loader returns tuples (image, label).
     """
 
@@ -37,17 +38,35 @@ class PatchSampler(LoaderWrapper):
         self.patches_per_image = get_patches_per_image(
             self.image_size, (self.size, self.size), (self.stride, self.stride)
         )
-        self.random = Random()
+
+    def __len__(self):
+        return len(self.loader) * self.patches_per_image
 
     def get_patch(self, image: np.ndarray, index: int) -> np.ndarray:
         return get_patch(image, size=self.size, stride=self.stride, patch_index=index)
 
-    def __getitem__(self, index):
-        x, y = self.loader[index]
-        patch_index = self.random.randint(0, self.patches_per_image - 1)
+    def __getitem__(self, index: int):
+        image_index, patch_index = self.get_indices(index)
+        x, y = self.loader[image_index]
         x_patch = self.get_patch(x, patch_index)
         y_patch = self.get_patch(y, patch_index)
         return x_patch, y_patch
+
+    def get_indices(self, index: int) -> Tuple[int, int]:
+        """
+        Returns the index of an input image and its corresponding patch index
+        from the input `index`.
+        """
+        image_index = index // self.patches_per_image
+        patch_index = index % self.patches_per_image
+        return image_index, patch_index
+
+    def split(self, test_ratio: float) -> Tuple["DataLoader", "DataLoader"]:
+        a, b = self.loader.split(test_ratio)
+        return (
+            PatchLoader(a, size=self.size, stride=self.stride),
+            PatchLoader(b, size=self.size, stride=self.stride),
+        )
 
 
 def get_image_size_from_loader(loader: DataLoader) -> ImageSize:
@@ -59,10 +78,10 @@ def get_image_size_from_loader(loader: DataLoader) -> ImageSize:
     return image_size
 
 
-class FilteredPatchSampler(PatchSampler):
+class FilteredPatchSampler(PatchLoader):
     """
-    Loader that returns patches of input images and masks.
-    Filters patches where masks are black with a certain probability.
+    Loader samples patches from input images and masks.
+    It also filters patches where masks are empty (black) with a certain probability.
     """
 
     def __init__(
@@ -70,12 +89,17 @@ class FilteredPatchSampler(PatchSampler):
     ):
         super().__init__(loader, size, stride)
         self.keep_black_probability = keep_black_probability
-        self.patch_indices = np.arange(0, self.patches_per_image)
+        self.max_filtered_patches = 16
+        self.random = random.Random()
 
     def __getitem__(self, index):
-        x, y = self.loader[index]
-        np.random.shuffle(self.patch_indices)
-        for patch_index in self.patch_indices:
+        # Try to find a non-empty mask patch
+        for _ in range(self.max_filtered_patches):
+            random_index = self.random.randrange(len(self))
+            image_index, patch_index = self.get_indices(random_index)
+
+            x, y = self.loader[image_index]
+
             y_patch = self.get_patch(y, patch_index)
             all_empty = np.all(y_patch == 0)
             if all_empty and self.random.random() > self.keep_black_probability:
@@ -83,4 +107,5 @@ class FilteredPatchSampler(PatchSampler):
             x_patch = self.get_patch(x, patch_index)
             return x_patch, y_patch
 
+        # No non-empty patch found, return patch from this index
         return super().__getitem__(index)
