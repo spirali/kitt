@@ -1,7 +1,9 @@
+from collections import defaultdict
+
 import numpy as np
 
 from kitt.dataloading import DataLoader
-from kitt.image.segmentation.dataloading import FilteredPatchSampler, PatchSampler
+from kitt.image.segmentation.dataloading import FilteredPatchSampler, PatchLoader
 from kitt.image.segmentation.patching import get_patch, get_patches_per_dimension
 
 
@@ -57,43 +59,51 @@ class Loader(DataLoader):
         return self.images[index], self.masks[index]
 
 
+def test_patching_loader_size():
+    images = np.zeros((4, 4, 3))
+    labels = images
+    loader = Loader([images], [labels])
+
+    assert len(PatchLoader(loader, size=2, stride=2)) == 4
+    assert len(PatchLoader(loader, size=2, stride=1)) == 9
+
+
 def test_patching_loader():
-    items = []
+    images = []
+    labels = []
+    expected_x_patches = defaultdict(int)
+
+    """
+    Generate images like this:
+    1122
+    3344
+    """
     dim = 4
-    count = dim * dim
-    for i in range(8):
-        start = i * count
-        item = np.array(list(range(start, start + count))).reshape((dim, dim))
-        items.append(item)
+    for image_index in range(8):
+        image = np.zeros((dim * dim, dim * dim))
+        for patch_row in range(dim):
+            for patch_col in range(dim):
+                value = image_index + patch_row * dim + patch_col
+                patch = np.full((dim, dim), value)
+                expected_x_patches[tuple(patch.ravel())] += 1
+                image[
+                    patch_row * dim : (patch_row + 1) * dim,
+                    patch_col * dim : (patch_col + 1) * dim,
+                ] = patch
+        images.append(image)
+        labels.append(image * 2)
 
-    def contained_within(image, subimage):
-        def check(a, b, upper_left):
-            ul_row = upper_left[0]
-            ul_col = upper_left[1]
-            b_rows, b_cols = b.shape
-            a_slice = a[ul_row : ul_row + b_rows, :][:, ul_col : ul_col + b_cols]
-            if a_slice.shape != b.shape:
-                return False
-            return (a_slice == b).all()
-
-        def find_slice(big_array, small_array):
-            upper_left = np.argwhere(big_array == small_array[0, 0])
-            for ul in upper_left:
-                if check(big_array, small_array, ul):
-                    return True
-            return False
-
-        return find_slice(image, subimage)
-
-    images = items[:4]
-    masks = items[4:]
-    loader = Loader(images, masks)
-    loader = PatchSampler(loader, size=2, stride=2)
+    loader = Loader(images, labels)
+    loader = PatchLoader(loader, size=dim, stride=dim)
     for (index, (x, y)) in enumerate(loader):
-        assert x.shape == (2, 2)
-        assert y.shape == (2, 2)
-        assert contained_within(images[index], x)
-        assert contained_within(masks[index], y)
+        assert x.shape == (dim, dim)
+        assert y.shape == (dim, dim)
+        assert (y == x * 2).all()
+
+        key = tuple(x.ravel())
+        assert key in expected_x_patches
+        expected_x_patches[key] -= 1
+    assert all(v == 0 for v in expected_x_patches.values())
 
 
 def test_filtered_patching_loader():
