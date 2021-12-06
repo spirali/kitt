@@ -49,6 +49,28 @@ def resize_if_needed(
     return resized
 
 
+def resize_to_width(image: np.ndarray, target_width: int) -> np.ndarray:
+    """Resizes an image to the target width, while keeping aspect ratio.
+
+    :param image: (height, width, channels)
+    :param target_width: Target width
+    """
+    size = get_image_size(image)
+    target_height = math.ceil((target_width / size[0]) * size[1])
+    return resize_if_needed(image, target_size=(target_width, target_height))
+
+
+def resize_to_height(image: np.ndarray, target_height: int) -> np.ndarray:
+    """Resizes an image to the target width, while keeping aspect ratio.
+
+    :param image: (height, width, channels)
+    :param target_height: Target height
+    """
+    size = get_image_size(image)
+    target_width = math.ceil((target_height / size[1]) * size[0])
+    return resize_if_needed(image, target_size=(target_width, target_height))
+
+
 def resize_and_pad(img, size, pad_color, interpolation):
     x, y = map(math.floor, size)
     new_w, new_h = x, y

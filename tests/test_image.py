@@ -1,7 +1,7 @@
 import cv2
 import numpy as np
 
-from kitt.image.image import resize_if_needed
+from kitt.image.image import resize_if_needed, resize_to_height, resize_to_width
 from kitt.image.image.tf import load_image
 from kitt.image.segmentation.image import polygons_to_binary_mask
 
@@ -110,3 +110,19 @@ def test_resize_keep_aspect_ratio_mixed_downsample():
     result_img[[0, 1, 2, -3, -2, -1]] = color
     img2 = resize_if_needed(img, (4, 8), True, color)
     assert np.array_equal(result_img, img2)
+
+
+def test_resize_to_width():
+    img = np.zeros((8, 4))
+    assert resize_to_width(img, 1).shape == (2, 1)
+    assert resize_to_width(img, 2).shape == (4, 2)
+    assert resize_to_width(img, 4).shape == (8, 4)
+    assert resize_to_width(img, 8).shape == (16, 8)
+
+
+def test_resize_to_height():
+    img = np.zeros((8, 4))
+    assert resize_to_height(img, 1).shape == (1, 1)
+    assert resize_to_height(img, 2).shape == (2, 1)
+    assert resize_to_height(img, 4).shape == (4, 2)
+    assert resize_to_height(img, 8).shape == (8, 4)
