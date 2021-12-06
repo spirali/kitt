@@ -61,7 +61,7 @@ class PatchLoader(LoaderWrapper):
         patch_index = index % self.patches_per_image
         return image_index, patch_index
 
-    def split(self, test_ratio: float) -> Tuple["DataLoader", "DataLoader"]:
+    def split(self, test_ratio: float) -> Tuple["PatchLoader", "PatchLoader"]:
         a, b = self.loader.split(test_ratio)
         return (
             PatchLoader(a, size=self.size, stride=self.stride),
