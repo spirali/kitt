@@ -90,7 +90,7 @@ class LoaderWrapper(DataLoader):
         return self.loader[index]
 
 
-class EagerLoader(LoaderWrapper):
+class EagerLoader(ListDataLoader):
     """
     Preloads all samples from the given loader and keeps them in memory.
 
@@ -108,15 +108,7 @@ class EagerLoader(LoaderWrapper):
     """
 
     def __init__(self, loader: DataLoader):
-        super().__init__(loader)
-        self.items = tuple(loader)
-
-    def __getitem__(self, index: int):
-        return self.items[index]
-
-    def split(self, test_ratio: float) -> Tuple["DataLoader", "DataLoader"]:
-        train, test = train_test_split(list(self.items), test_ratio)
-        return (ListDataLoader(train), ListDataLoader(test))
+        super().__init__(list(loader))
 
 
 class MappingLoader(LoaderWrapper):
