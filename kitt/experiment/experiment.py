@@ -57,7 +57,7 @@ class Run:
         """
         params = [f"- {key}: {value}" for (key, value) in sorted(self.parameters.items())]
         params_text = "\n".join(params)
-        text_md = f"**Training run {self.name}**\n{params_text}"
+        text_md = f"**Training run {self.name}**\n\n{params_text}"
         self.write_tb_summary("Training run", text_md)
 
     def store_to_disk(self):
