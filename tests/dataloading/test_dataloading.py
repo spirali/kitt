@@ -60,10 +60,24 @@ def test_eager_loading():
             return index
 
     loader = Loader()
-    loader = EagerLoader(loader)
+    loader = EagerLoader(loader, parallel=False)
     list(loader)
     list(loader)
     assert load_count == 5
+
+
+class Loader(DataLoader):
+    def __len__(self):
+        return 5
+
+    def __getitem__(self, index):
+        return index * 2
+
+
+def test_eager_loading_parallel():
+    loader = Loader()
+    eager_loader = EagerLoader(loader, parallel=True)
+    assert list(loader) == list(eager_loader)
 
 
 def test_mapping():

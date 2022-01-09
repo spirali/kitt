@@ -1,7 +1,9 @@
 import math
-from typing import Tuple
+from multiprocessing import Pool
+from typing import List, Tuple
 
 import numpy as np
+from tqdm import tqdm
 
 from ..data import train_test_split
 
@@ -90,6 +92,24 @@ class LoaderWrapper(DataLoader):
         return self.loader[index]
 
 
+def eager_load_item(args):
+    loader, index = args
+    return loader[index]
+
+
+def eager_load(loader: DataLoader, parallel=True) -> List:
+    items = []
+    if parallel:
+        with Pool() as pool:
+            args = [(loader, i) for i in range(len(loader))]
+            for item in tqdm(pool.imap(eager_load_item, args), total=len(args)):
+                items.append(item)
+    else:
+        for item in tqdm(loader):
+            items.append(item)
+    return items
+
+
 class EagerLoader(ListDataLoader):
     """
     Preloads all samples from the given loader and keeps them in memory.
@@ -107,8 +127,8 @@ class EagerLoader(ListDataLoader):
     ```
     """
 
-    def __init__(self, loader: DataLoader):
-        super().__init__(list(loader))
+    def __init__(self, loader: DataLoader, parallel=True):
+        super().__init__(eager_load(loader, parallel=parallel))
 
 
 class MappingLoader(LoaderWrapper):
