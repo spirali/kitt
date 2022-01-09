@@ -55,7 +55,9 @@ class Run:
         Stores input parameters to TensorBoard.
         Call this before starting training.
         """
-        params = [f"- {key}: {value}" for (key, value) in sorted(self.parameters.items())]
+        params = [
+            f"- {key}: {value}" for (key, value) in sorted(self.parameters.items())
+        ]
         params_text = "\n".join(params)
         text_md = f"**Training run {self.name}**\n\n{params_text}"
         self.write_tb_summary("Training run", text_md)

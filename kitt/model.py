@@ -1,6 +1,6 @@
 import io
 from pathlib import Path
-from typing import Tuple, Union
+from typing import Union
 
 import h5py
 from tensorflow import keras
@@ -15,9 +15,6 @@ from .environment import get_constructor_arguments
 class ModelWrapper:
     def __init__(self):
         self.params = get_constructor_arguments()
-
-    def input_size(self) -> Tuple[int, int]:
-        raise NotImplementedError()
 
     def input_preprocessing(self) -> Preprocessing:
         return IdentityPreprocessing()
