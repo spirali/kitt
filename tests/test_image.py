@@ -3,7 +3,10 @@ import numpy as np
 
 from kitt.image.image import resize_if_needed, resize_to_height, resize_to_width
 from kitt.image.image.tf import load_image
+from kitt.image.plot import render_plt_to_cv
 from kitt.image.segmentation.image import polygons_to_binary_mask
+
+import matplotlib.pyplot as plt
 
 from .conftest import check_image_equality, data_path
 
@@ -126,3 +129,14 @@ def test_resize_to_height():
     assert resize_to_height(img, 2).shape == (2, 1)
     assert resize_to_height(img, 4).shape == (4, 2)
     assert resize_to_height(img, 8).shape == (8, 4)
+
+
+def test_plot_to_image():
+    x = [1, 2, 3]
+    y = [5, 2, 8]
+
+    plt.cla()
+    plt.plot(x, y)
+
+    image = render_plt_to_cv()
+    check_image_equality(image, data_path("image/plot1.png"), delta=5)
