@@ -31,13 +31,13 @@ class ModelEntry:
 
 class ModelCheckpoint(Callback):
     def __init__(
-            self,
-            filepath: str,
-            monitor: str,
-            mode: str = "max",
-            save_every_n_epochs: int = None,
-            save_n_best=1,
-            save_optimizer=False,
+        self,
+        filepath: str,
+        monitor: str,
+        mode: str = "max",
+        save_every_n_epochs: int = None,
+        save_n_best=1,
+        save_optimizer=False,
     ):
         """
         :param filepath: Filepath where to save the model. Can contain "epoch" and "<monitor>"
@@ -125,11 +125,16 @@ class ModelCheckpoint(Callback):
 
     def push_model(self, epoch: int, metric_value: float, path: str, pin: bool):
         value = self.metric_map_fn(metric_value)
-        heapq.heappush(self.best_queue, ModelEntry(
-            model=SavedModel(metric=metric_value, saved_epoch=epoch, path=Path(path)),
-            metric=value,
-            pinned=pin
-        ))
+        heapq.heappush(
+            self.best_queue,
+            ModelEntry(
+                model=SavedModel(
+                    metric=metric_value, saved_epoch=epoch, path=Path(path)
+                ),
+                metric=value,
+                pinned=pin,
+            ),
+        )
 
     def push_model_bounded(self, epoch: int, metric_value: float, path: str, pin: bool):
         self.push_model(epoch=epoch, metric_value=metric_value, path=path, pin=pin)

@@ -1,12 +1,11 @@
 import cv2
+import matplotlib.pyplot as plt
 import numpy as np
 
 from kitt.image.image import resize_if_needed, resize_to_height, resize_to_width
 from kitt.image.image.tf import load_image
 from kitt.image.plot import render_plt_to_cv
 from kitt.image.segmentation.image import polygons_to_binary_mask
-
-import matplotlib.pyplot as plt
 
 from .conftest import check_image_equality, data_path
 
