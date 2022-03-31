@@ -27,6 +27,12 @@ class Run:
         self.metrics = {}
         self.artifacts = []
 
+    def sub_run(self, name: str) -> "Run":
+        """
+        Creates a nested Run, useful e.g. for combining multiple runs together in cross-validation.
+        """
+        return Run(name, self.directory / name, self.log_directory())
+
     def __enter__(self):
         logging.info(f"Starting run {self.name}")
         return self
