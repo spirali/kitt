@@ -138,4 +138,4 @@ def test_plot_to_image():
     plt.plot(x, y)
 
     image = render_plt_to_cv()
-    check_image_equality(image, data_path("image/plot1.png"), delta=5)
+    check_image_equality(image, data_path("image/plot1.png"))
