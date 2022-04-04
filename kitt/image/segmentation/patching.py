@@ -34,7 +34,7 @@ def get_patch(
     """
     width, height = get_image_size(image)
     patch_cols = get_patches_per_dimension(width, size, stride)
-    patch_rows = get_patches_per_dimension(width, size, stride)
+    patch_rows = get_patches_per_dimension(height, size, stride)
 
     assert patch_index < patch_rows * patch_cols
     row = patch_index // patch_cols
