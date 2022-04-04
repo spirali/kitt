@@ -1,10 +1,16 @@
 from collections import defaultdict
+from typing import List
 
 import numpy as np
 
 from kitt.dataloading import DataLoader
+from kitt.image.image import get_image_size
 from kitt.image.segmentation.dataloading import FilteredPatchSampler, PatchLoader
-from kitt.image.segmentation.patching import get_patch, get_patches_per_dimension
+from kitt.image.segmentation.patching import (
+    get_patch,
+    get_patches_per_dimension,
+    get_patches_per_image,
+)
 
 
 def test_patches_per_dimension():
@@ -12,38 +18,99 @@ def test_patches_per_dimension():
     assert get_patches_per_dimension(1024, size=256, stride=128) == 7
 
 
-def test_get_patch():
+def check_patches(
+    image: np.ndarray, size: int, stride: int, expected: List[np.ndarray]
+):
+    assert len(expected) == get_patches_per_image(
+        get_image_size(image), (size, size), (stride, stride)
+    )
+    for (patch_index, expected_patch) in enumerate(expected):
+        patch = get_patch(image, size=size, stride=stride, patch_index=patch_index)
+        if not (patch == expected_patch).all():
+            raise Exception(f"Patch {patch_index} does not match")
+
+
+def test_get_patch_same_dims_same_stride():
     image = np.array(range(64)).reshape((8, 8))
 
-    assert (
-        get_patch(image, 4, 4, 0).flatten()
-        == [0, 1, 2, 3, 8, 9, 10, 11, 16, 17, 18, 19, 24, 25, 26, 27]
-    ).all()
-    assert (
-        get_patch(image, 4, 4, 1).flatten()
-        == [4, 5, 6, 7, 12, 13, 14, 15, 20, 21, 22, 23, 28, 29, 30, 31]
-    ).all()
-    assert (
-        get_patch(image, 4, 4, 2).flatten()
-        == [32, 33, 34, 35, 40, 41, 42, 43, 48, 49, 50, 51, 56, 57, 58, 59]
-    ).all()
-    assert (
-        get_patch(image, 4, 4, 3).flatten()
-        == [36, 37, 38, 39, 44, 45, 46, 47, 52, 53, 54, 55, 60, 61, 62, 63]
-    ).all()
+    check_patches(
+        image, 4, 4, [image[:4, :4], image[:4, 4:8], image[4:8, :4], image[4:8, 4:8]]
+    )
 
-    assert (
-        get_patch(image, 4, 2, 1).flatten()
-        == [2, 3, 4, 5, 10, 11, 12, 13, 18, 19, 20, 21, 26, 27, 28, 29]
-    ).all()
-    assert (
-        get_patch(image, 4, 2, 3).flatten()
-        == [16, 17, 18, 19, 24, 25, 26, 27, 32, 33, 34, 35, 40, 41, 42, 43]
-    ).all()
-    assert (
-        get_patch(image, 4, 2, 8).flatten()
-        == [36, 37, 38, 39, 44, 45, 46, 47, 52, 53, 54, 55, 60, 61, 62, 63]
-    ).all()
+
+def test_get_patch_same_dims_different_stride():
+    image = np.array(range(64)).reshape((8, 8))
+
+    check_patches(
+        image,
+        4,
+        2,
+        [
+            image[:4, :4],
+            image[:4, 2:6],
+            image[:4, 4:8],
+            image[2:6, :4],
+            image[2:6, 2:6],
+            image[2:6, 4:8],
+            image[4:8, :4],
+            image[4:8, 2:6],
+            image[4:8, 4:8],
+        ],
+    )
+
+
+def test_get_patch_different_dims_same_stride():
+    image = np.array(range(32)).reshape((4, 8))
+
+    check_patches(
+        image,
+        4,
+        4,
+        [
+            image[:4, :4],
+            image[:4, 4:8],
+        ],
+    )
+
+    image = np.array(range(32)).reshape((8, 4))
+
+    check_patches(
+        image,
+        4,
+        4,
+        [
+            image[:4, :4],
+            image[4:8, :4],
+        ],
+    )
+
+
+def test_get_patch_different_dims_different_stride():
+    image = np.array(range(32)).reshape((4, 8))
+
+    check_patches(
+        image,
+        4,
+        2,
+        [
+            image[:4, :4],
+            image[:4, 2:6],
+            image[:4, 4:8],
+        ],
+    )
+
+    image = np.array(range(32)).reshape((8, 4))
+
+    check_patches(
+        image,
+        4,
+        2,
+        [
+            image[:4, :4],
+            image[2:6, :4],
+            image[4:8, :4],
+        ],
+    )
 
 
 class Loader(DataLoader):
