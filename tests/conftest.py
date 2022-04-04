@@ -15,10 +15,14 @@ def data_path(path: str) -> str:
     return str(TEST_DIR / "data" / path)
 
 
-def check_image_equality(image: np.ndarray, path: str, color_mode="rgb", delta=None):
-    reference = load_image(data_path(path), color_mode=color_mode)
+def check_image_equality(image: np.ndarray, path: str, delta=3):
+    from PIL import Image, ImageChops, ImageStat
 
-    if delta is None:
-        assert (image == reference).all()
-    else:
-        assert np.allclose(image[:, :], reference[:, :], rtol=delta)
+    image = Image.fromarray(image)
+    reference = Image.open(path).convert("RGB")
+
+    difference = ImageChops.difference(image, reference)
+    stat = ImageStat.Stat(difference)
+    diff = sum(stat.mean)
+    if diff > delta:
+        raise Exception("Images are not equal enough")
