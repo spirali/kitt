@@ -6,10 +6,9 @@ import sys
 import time
 from datetime import datetime
 
-from .files import GenericPath
 from . import serialization
+from .files import GenericPath
 from .utils import get_extension, get_process_output
-
 
 # Backwards compatibility (04/2022)
 write_yaml = serialization.write_yaml
