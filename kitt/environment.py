@@ -1,4 +1,3 @@
-import dataclasses
 import inspect
 import os
 import re
@@ -7,26 +6,13 @@ import sys
 import time
 from datetime import datetime
 
-from yaml import SafeDumper
-
 from .files import GenericPath
+from . import serialization
 from .utils import get_extension, get_process_output
 
 
-class CustomDumper(SafeDumper):
-    def ignore_aliases(self, data):
-        return True
-
-    def represent_data(self, data):
-        if dataclasses.is_dataclass(data):
-            return super().represent_dict(dataclasses.asdict(data))
-        return super().represent_data(data)
-
-
-def write_yaml(object, stream):
-    import yaml
-
-    yaml.dump(object, stream, Dumper=CustomDumper)
+# Backwards compatibility (04/2022)
+write_yaml = serialization.write_yaml
 
 
 def write_environment_yaml(path: GenericPath, **kwargs):
@@ -43,7 +29,7 @@ def write_environment_yaml(path: GenericPath, **kwargs):
         del data["env"]
 
     with open(path, "w") as f:
-        write_yaml(data, f)
+        serialization.write_yaml(data, f)
 
 
 def get_environment():

@@ -7,7 +7,8 @@ import string
 from pathlib import Path
 from typing import Any, Dict, Optional
 
-from ..environment import write_environment_yaml, write_yaml
+from ..environment import write_environment_yaml
+from ..serialization import write_yaml
 from ..files import GenericPath, ensure_directory
 
 RUN_RESULT_PATH = "result.json"
