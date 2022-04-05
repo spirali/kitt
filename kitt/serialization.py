@@ -27,7 +27,7 @@ def dataclass_from_dict(cls, data, **config_kwargs):
     return dacite.from_dict(cls, data, config=config)
 
 
-def tagged_dataclass(cls=None, /, tag_field="type", **kwargs):
+def tagged_dataclass(cls=None, tag_field="type", **kwargs):
     """
     Use this decorator instead of `dataclasses.dataclass` to create a dataclass that contains an
     automatically created tag field containing its name.
