@@ -12,6 +12,6 @@ tensorflow>=2.3,<2.8; sys_platform != "darwin"
 tensorflow-macos>=2.5; sys_platform == "darwin"
 tensorflow-metal>=0.1; sys_platform == "darwin"
 pyyaml>=5
-dacite==1.6.0
+dacite @ git+https://github.com/kobzol/dacite@82fe831c45dca05297a04fbafe0dd72ad15f8050
 keras-unet==0.1.2
 typing_extensions==4.1.1;python_version<'3.8'
