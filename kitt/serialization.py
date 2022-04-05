@@ -1,5 +1,4 @@
 import dataclasses
-import typing
 
 import dacite
 from dacite import Config
@@ -53,12 +52,18 @@ def tagged_dataclass(cls=None, tag_field="type", **kwargs):
         ```
     """
 
+    try:
+        # backcompat: Python 3.8
+        from typing import Literal
+    except ImportError:
+        from typing_extensions import Literal
+
     def wrap(cls):
         class_name = cls.__name__
         assert tag_field not in cls.__annotations__
 
         # Set annotation
-        cls.__annotations__[tag_field] = typing.Literal[class_name]
+        cls.__annotations__[tag_field] = Literal[class_name]
 
         # Set field
         setattr(
