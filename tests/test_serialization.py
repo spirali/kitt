@@ -62,6 +62,28 @@ def test_tag_dataclass_custom_field_name():
     assert foo.foo == "Foo"
 
 
+def test_tagged_dataclass_no_fields():
+    @tagged_dataclass
+    class Foo:
+        pass
+
+    foo = Foo()
+    assert dataclass_roundtrip(Foo, foo) == foo
+
+
+def test_tagged_dataclass_no_fields_with_inheritance():
+    @dataclasses.dataclass
+    class Base:
+        a: int
+
+    @tagged_dataclass
+    class Foo(Base):
+        pass
+
+    foo = Foo(a=1)
+    assert dataclass_roundtrip(Foo, foo) == foo
+
+
 def test_tagged_dataclass_pass_arguments():
     @tagged_dataclass(frozen=True)
     class Foo:

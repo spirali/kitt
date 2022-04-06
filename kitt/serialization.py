@@ -60,6 +60,9 @@ def tagged_dataclass(cls=None, tag_field="type", **kwargs):
 
     def wrap(cls):
         class_name = cls.__name__
+        # Create __annotations__ if the class has no fields
+        if "__annotations__" not in cls.__dict__:
+            setattr(cls, "__annotations__", {})
         assert tag_field not in cls.__annotations__
 
         # Set annotation
