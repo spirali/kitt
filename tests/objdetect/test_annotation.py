@@ -2,7 +2,8 @@ import numpy as np
 import pytest
 
 from kitt.image.image.tf import load_image
-from kitt.image.objdetect.annotation import AnnotatedImage
+from kitt.image.objdetect.annotation import AnnotatedBBox, AnnotatedImage
+from kitt.image.objdetect.bbox import BBox
 
 from ..conftest import data_path
 
@@ -35,3 +36,12 @@ def test_img_conversion():
     image_pil = annotation.to_pillow()
     assert image_pil.width == 500
     assert image_pil.height == 375
+
+
+def test_map_bbox():
+    bbox = AnnotatedBBox("foo", BBox(1, 2, 3, 4))
+    bbox2 = bbox.map_bbox(
+        lambda b: BBox(b.xmin * 2, b.xmax * 2, b.ymin * 2, b.ymax * 2)
+    )
+    assert bbox.class_name == bbox2.class_name
+    assert bbox2.bbox.x1y1x2y2() == (2, 6, 4, 8)
