@@ -3,9 +3,8 @@ from typing import List
 
 import cv2
 import numpy as np
-import seaborn as sns
 
-DEFAULT_PALETTE = sns.color_palette("pastel", 100)
+from ..color import DEFAULT_PALETTE
 
 
 def color_bitmap_masks(mask, palette=DEFAULT_PALETTE):

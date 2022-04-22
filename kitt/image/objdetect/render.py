@@ -1,24 +1,35 @@
-from typing import List
+from typing import Callable, List
 
 import cv2
 import numpy as np
 
+from ..color import BGRUintColor
 from ..image import get_image_size
 from .annotation import AnnotatedBBox, AnnotationType
 
+DEFAULT_COLOR_MAP = {
+    AnnotationType.GROUND_TRUTH: (255, 255, 255),
+    AnnotationType.PREDICTION: (255, 255, 0),
+}
 
-def render_annotations(image: np.ndarray, annotations: List[AnnotatedBBox]):
+
+def color_annotation(annotation: AnnotatedBBox) -> BGRUintColor:
+    return DEFAULT_COLOR_MAP[annotation.type]
+
+
+def render_annotations(
+    image: np.ndarray,
+    annotations: List[AnnotatedBBox],
+    color_fn: Callable[[AnnotatedBBox], BGRUintColor] = None,
+):
     """Renders bounding boxes onto an image, optionally with labels and probabilities."""
-    color_map = {
-        AnnotationType.GROUND_TRUTH: (255, 255, 255),
-        AnnotationType.PREDICTION: (255, 255, 0),
-    }
+    if color_fn is None:
+        color_fn = color_annotation
 
     for annotation in annotations:
         box = annotation.bbox.as_denormalized(*get_image_size(image)).to_int()
-        cv2.rectangle(
-            image, box.top_left, box.bottom_right, color_map[annotation.type], 4
-        )
+        color = color_fn(annotation)
+        cv2.rectangle(image, box.top_left, box.bottom_right, color, 4)
 
         label = annotation.class_name
         confidence = annotation.confidence
@@ -35,6 +46,6 @@ def render_annotations(image: np.ndarray, annotations: List[AnnotatedBBox]):
                 (box.top_left[0] + 20, box.top_left[1] + 40),
                 cv2.FONT_HERSHEY_SIMPLEX,
                 1,  # font scale
-                color_map[annotation.type],
-                2,
-            )  # line type
+                color,
+                2,  # line type
+            )
