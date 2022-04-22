@@ -23,7 +23,24 @@ def dataclass_from_dict(cls, data, **config_kwargs):
         from dacite.core import _build_value_for_union
 
         return _build_value_for_union(cls, data, config)
+    else:
+        # Try to match child classes if they look like tagged dataclasses
+        subclasses = cls.__subclasses__()
+        dataclass_subclasses = [
+            c
+            for c in subclasses
+            if dataclasses.is_dataclass(c) and TAGGED_DATACLASS_KEY in c.__dict__
+        ]
+        if dataclass_subclasses:
+            for klass in dataclass_subclasses:
+                try:
+                    return dacite.from_dict(klass, data, config=config)
+                except:  # noqa
+                    pass
     return dacite.from_dict(cls, data, config=config)
+
+
+TAGGED_DATACLASS_KEY = "__KITT_TAGGED_DATACLASS"
 
 
 def tagged_dataclass(cls=None, tag_field="type", **kwargs):
@@ -76,6 +93,9 @@ def tagged_dataclass(cls=None, tag_field="type", **kwargs):
                 default=class_name, hash=False, compare=False, repr=False, init=False
             ),
         )
+
+        # Set meta key
+        setattr(cls, TAGGED_DATACLASS_KEY, True)
 
         # Set field setter
         return dataclasses.dataclass(cls, **kwargs)
