@@ -1,6 +1,6 @@
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import List, Optional, Union
+from typing import Callable, List, Optional, Union
 
 import numpy as np
 from PIL import Image
@@ -37,6 +37,15 @@ class AnnotatedBBox:
             bbox=bbox,
             type=AnnotationType.PREDICTION,
             confidence=confidence,
+        )
+
+    def map_bbox(self, map_fn: Callable[[BBoxBase], BBoxBase]) -> "AnnotatedBBox":
+        bbox = map_fn(self.bbox)
+        return AnnotatedBBox(
+            class_name=self.class_name,
+            bbox=bbox,
+            type=self.type,
+            confidence=self.confidence,
         )
 
     def __post_init__(self):

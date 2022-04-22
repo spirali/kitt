@@ -2,9 +2,9 @@ import logging
 import math
 from typing import Iterable, Tuple
 
-from PIL import Image as PILImage
 import cv2
 import numpy as np
+from PIL import Image as PILImage
 
 ImageSize = Tuple[int, int]
 
