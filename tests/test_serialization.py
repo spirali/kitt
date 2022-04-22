@@ -36,6 +36,18 @@ d:
     )
 
 
+def test_deserialize_dataclass():
+    @dataclasses.dataclass
+    class Foo:
+        a: int = 5
+        b: str = "foo"
+
+    obj = dataclass_from_dict(Foo, {"a": 1, "b": "bar"})
+    assert isinstance(obj, Foo)
+    assert obj.a == 1
+    assert obj.b == "bar"
+
+
 def test_tag_dataclass_instance():
     @tagged_dataclass
     class Foo:
@@ -161,6 +173,26 @@ def test_tagged_dataclass_from_dict():
     obj = Cls2(a=1)
     obj2 = dataclass_roundtrip(Adt, obj)
     assert obj == obj2
+
+
+def test_tagged_dataclass_from_base_class():
+    @dataclasses.dataclass
+    class Base:
+        a: int
+
+    @tagged_dataclass
+    class Foo(Base):
+        b: str
+
+    @tagged_dataclass
+    class Bar(Base):
+        b: str
+
+    foo = Foo(a=1, b="foo")
+    assert dataclass_roundtrip(Base, foo) == foo
+
+    bar = Bar(a=1, b="bar")
+    assert dataclass_roundtrip(Base, bar) == bar
 
 
 def dataclass_roundtrip(type, obj):
