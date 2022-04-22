@@ -136,6 +136,10 @@ def numpy_to_pillow(image: np.ndarray) -> PILImage.Image:
     return PILImage.fromarray(image)
 
 
+def pillow_to_numpy(image: PILImage.Image) -> np.ndarray:
+    return np.asarray(image)
+
+
 def channels_first_to_last(arr: np.ndarray) -> np.ndarray:
     return np.transpose(arr, (1, 2, 0))
 
