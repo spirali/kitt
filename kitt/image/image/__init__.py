@@ -2,6 +2,7 @@ import logging
 import math
 from typing import Iterable, Tuple
 
+from PIL import Image as PILImage
 import cv2
 import numpy as np
 
@@ -129,6 +130,10 @@ def rgb_to_bgr(image: np.ndarray) -> np.ndarray:
 
 def bgr_to_rgb(image: np.ndarray) -> np.ndarray:
     return cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+
+
+def numpy_to_pillow(image: np.ndarray) -> PILImage.Image:
+    return PILImage.fromarray(image)
 
 
 def channels_first_to_last(arr: np.ndarray) -> np.ndarray:
