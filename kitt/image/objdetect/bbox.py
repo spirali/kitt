@@ -23,8 +23,8 @@ class BBoxBase:
     def __post_init__(self):
         if type(self) is BBoxBase:
             raise Exception("Please create either BBox or NormalizedBBox")
-        assert self.xmax > self.xmin
-        assert self.ymax > self.ymin
+        assert self.xmax >= self.xmin
+        assert self.ymax >= self.ymin
 
     @classmethod
     def from_x1y1x2y2(cls, x1: float, y1: float, x2: float, y2: float):
