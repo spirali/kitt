@@ -38,14 +38,6 @@ def test_clip_bbox():
     assert bbox.as_tuple() == (0, 20, 0, 30)
 
 
-def test_invalid_bbox():
-    with pytest.raises(Exception):
-        BBox(xmin=0, xmax=0, ymin=0.5, ymax=0.6)
-
-    with pytest.raises(Exception):
-        BBox(xmin=1, xmax=0, ymin=0.3, ymax=0.5)
-
-
 def test_from_xywh():
     bbox = BBox.from_xywh(5, 6, 10, 30)
     assert bbox.xmin == 5
