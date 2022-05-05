@@ -14,13 +14,13 @@ from ...files import GenericPath
 from ...image.plot import render_plt_to_cv
 
 
-def draw_confusion_matrices(confusion_matrices: np.ndarray, column_count=4):
+def draw_confusion_matrices(confusion_matrices: np.ndarray, columns=4):
     """
     Draws confusion matrices using pyplot.
 
     :param confusion_matrices: Numpy array containing one or more confusion matrices.
     Shape should be (2, 2) or (N, 2, 2).
-    :param column_count: How many columns should the CM grid wrap to.
+    :param columns: How many columns should the CM grid wrap to.
     """
     if confusion_matrices.ndim == 2:
         confusion_matrices = np.expand_dims(confusion_matrices, axis=0)
@@ -42,9 +42,9 @@ def draw_confusion_matrices(confusion_matrices: np.ndarray, column_count=4):
 
     def draw(data, **kwargs):
         data = data.pivot("gt", "prediction", "count")
-        sns.heatmap(data, annot=True)
+        sns.heatmap(data, annot=True, fmt="d")
 
-    cols = min(column_count, len(confusion_matrices))
+    cols = min(columns, len(confusion_matrices))
     row_count = int(math.ceil(len(confusion_matrices) / cols))
 
     g = sns.FacetGrid(df, col="class", col_wrap=cols)
@@ -99,7 +99,7 @@ class ConfusionMatrixCallback(Callback):
         cms = multilabel_confusion_matrix(gts, predictions)
 
         def render():
-            draw_confusion_matrices(cms, column_count=4)
+            draw_confusion_matrices(cms, columns=4)
             img = render_plt_to_cv()
             plt.close(plt.gcf())
             img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
