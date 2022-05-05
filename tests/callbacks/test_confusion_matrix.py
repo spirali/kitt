@@ -49,7 +49,7 @@ def test_cm_callback(tmpdir, class_count: int):
     train(sequence, cm, n_classes=class_count)
 
 
-def test_draw_confusion_matrix_single(tmpdir):
+def test_draw_confusion_matrix_single_class(tmpdir):
     cm = [[5, 2], [0, 1]]
     draw_confusion_matrices(np.array(cm))
     image = render_plt_to_cv()
@@ -58,12 +58,30 @@ def test_draw_confusion_matrix_single(tmpdir):
     )
 
 
-def test_draw_confusion_matrix_multiple(tmpdir):
+def test_draw_confusion_matrix_multiple_classes(tmpdir):
     cm = [[[5, 2], [0, 1]], [[2, 1], [4, 0]]]
     draw_confusion_matrices(np.array(cm))
     image = render_plt_to_cv()
     check_image_equality(
         cv2.cvtColor(image, cv2.COLOR_BGR2RGB), data_path("confusion-matrix/cm2.png")
+    )
+
+
+def test_draw_confusion_matrix_multiple_rows(tmpdir):
+    cm = [[[5, 2], [0, 1]], [[2, 1], [4, 0]], [[2, 1], [1, 1]], [[3, 2], [3, 3]]]
+    draw_confusion_matrices(np.array(cm), columns=2)
+    image = render_plt_to_cv()
+    check_image_equality(
+        cv2.cvtColor(image, cv2.COLOR_BGR2RGB), data_path("confusion-matrix/cm3.png")
+    )
+
+
+def test_draw_confusion_matrix_large_values(tmpdir):
+    cm = [[[128, 5321], [850, 10001]]]
+    draw_confusion_matrices(np.array(cm))
+    image = render_plt_to_cv()
+    check_image_equality(
+        cv2.cvtColor(image, cv2.COLOR_BGR2RGB), data_path("confusion-matrix/cm4.png")
     )
 
 
