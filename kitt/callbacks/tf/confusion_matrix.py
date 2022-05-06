@@ -6,7 +6,7 @@ import numpy as np
 import pandas as pd
 import seaborn as sns
 import tensorflow as tf
-from sklearn.metrics import multilabel_confusion_matrix
+from sklearn.metrics import confusion_matrix, multilabel_confusion_matrix
 from tensorflow.keras.callbacks import Callback
 from tensorflow.keras.utils import Sequence
 
@@ -42,6 +42,9 @@ def draw_confusion_matrices(confusion_matrices: np.ndarray, columns=4):
 
     def draw(data, **kwargs):
         data = data.pivot("gt", "prediction", "count")
+        # Reverse rows and columns to have (1, 1) in the "upper left corner"
+        data = data.reindex(index=data.index[::-1])
+        data = data[data.columns[::-1]]
         sns.heatmap(data, annot=True, fmt="d")
 
     cols = min(columns, len(confusion_matrices))
@@ -56,6 +59,29 @@ def draw_confusion_matrices(confusion_matrices: np.ndarray, columns=4):
     for ax in g.axes:
         ax.set_xlabel("Prediction")
         ax.set_ylabel("GT")
+
+
+def calculate_confusion_matrix(gts: np.ndarray, predictions: np.ndarray) -> np.ndarray:
+    """
+    Calculates confusion matrix for single or multi-class classification.
+    `gts` and `predictions` should have shapes (`n_samples`, `n_classes`).
+
+    Returned array will have shape (`n_classes`, 2, 2).
+    """
+    assert gts.ndim == 2
+    assert gts.ndim == predictions.ndim
+    assert gts.shape == predictions.shape
+
+    class_count = gts.shape[1]
+
+    # multilable_confusion_matrix has weird behaviour for a single class
+    if class_count == 1:
+        cm = confusion_matrix(gts, predictions, labels=[0, 1])
+        result = np.expand_dims(cm, axis=0)
+    else:
+        result = multilabel_confusion_matrix(gts, predictions)
+    assert result.shape == (class_count, 2, 2)
+    return result
 
 
 class ConfusionMatrixCallback(Callback):
@@ -96,7 +122,7 @@ class ConfusionMatrixCallback(Callback):
             predictions.extend(preds)
         predictions = (np.array(predictions) >= self.round_threshold).astype(np.float32)
 
-        cms = multilabel_confusion_matrix(gts, predictions)
+        cms = calculate_confusion_matrix(np.array(gts), predictions)
 
         def render():
             draw_confusion_matrices(cms, columns=4)

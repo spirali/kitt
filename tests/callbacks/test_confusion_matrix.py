@@ -8,6 +8,7 @@ from tensorflow.keras.layers import Dense
 
 from kitt.callbacks.tf.confusion_matrix import (
     ConfusionMatrixCallback,
+    calculate_confusion_matrix,
     draw_confusion_matrices,
 )
 from kitt.dataloading import BatchLoader, ListDataLoader
@@ -49,9 +50,32 @@ def test_cm_callback(tmpdir, class_count: int):
     train(sequence, cm, n_classes=class_count)
 
 
+@pytest.mark.parametrize("class_count", (1, 2))
+@pytest.mark.parametrize("value", (0, 1))
+def test_draw_confusion_matrix_same_values(tmpdir, class_count: int, value: int):
+    y_true = np.array([[value] * class_count, [value] * class_count])
+    y_pred = np.array([[value] * class_count, [value] * class_count])
+
+    cm = calculate_confusion_matrix(y_true, y_pred)
+    assert cm.shape[0] == class_count
+
+    draw_confusion_matrices(cm)
+    image = render_plt_to_cv()
+    check_image_equality(
+        cv2.cvtColor(image, cv2.COLOR_BGR2RGB),
+        data_path(f"confusion-matrix/cm-{class_count}c-all-{value}.png"),
+    )
+
+
 def test_draw_confusion_matrix_single_class(tmpdir):
-    cm = [[5, 2], [0, 1]]
-    draw_confusion_matrices(np.array(cm))
+    # 3 TP, 2 TN, 1 FP, 0 FN
+    y_true = np.array([[1], [0], [0], [1], [1], [0]])
+    y_pred = np.array([[1], [0], [0], [1], [1], [1]])
+
+    cm = calculate_confusion_matrix(y_true, y_pred)
+    assert cm.shape[0] == 1
+
+    draw_confusion_matrices(cm)
     image = render_plt_to_cv()
     check_image_equality(
         cv2.cvtColor(image, cv2.COLOR_BGR2RGB), data_path("confusion-matrix/cm1.png")
@@ -59,7 +83,19 @@ def test_draw_confusion_matrix_single_class(tmpdir):
 
 
 def test_draw_confusion_matrix_multiple_classes(tmpdir):
-    cm = [[[5, 2], [0, 1]], [[2, 1], [4, 0]]]
+    # class 0: 3 TP, 2 TN, 1 FP, 0 FN
+    # class 1: 1 TP, 1 TN, 3 FP, 1 FN
+    # class 2: 0 TP, 2 TN, 2 FP, 2 FN
+    y_true = np.array(
+        [[1, 1, 0], [1, 0, 0], [1, 0, 0], [0, 0, 0], [0, 0, 1], [0, 1, 1]]
+    )
+    y_pred = np.array(
+        [[1, 1, 0], [1, 0, 0], [1, 1, 1], [0, 1, 1], [0, 1, 0], [1, 0, 0]]
+    )
+
+    cm = calculate_confusion_matrix(y_true, y_pred)
+    assert cm.shape[0] == 3
+
     draw_confusion_matrices(np.array(cm))
     image = render_plt_to_cv()
     check_image_equality(
