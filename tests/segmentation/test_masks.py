@@ -41,12 +41,10 @@ def test_overlay_masks():
     check_image_equality(
         overlay_masks(background, masks, alpha=1.0),
         data_path("segmentation/color_masks/overlay-alpha-1.0.png"),
-        delta=0.001,
     )
     check_image_equality(
         overlay_masks(background, masks, alpha=0.5),
         data_path("segmentation/color_masks/overlay-alpha-0.5.png"),
-        delta=0.001,
     )
 
 
