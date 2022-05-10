@@ -89,4 +89,6 @@ def check_image_equality(image: np.ndarray, path: str, delta=0.01):
             return
         show_image_diff(reference, generated_image)
 
-        raise Exception(f"Image is not equal enough with reference at `{path}`, diff: {diff}")
+        raise Exception(
+            f"Image is not equal enough with reference at `{path}`, diff: {diff}"
+        )
