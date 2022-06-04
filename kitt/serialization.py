@@ -126,3 +126,16 @@ def write_yaml(object, stream):
     import yaml
 
     yaml.dump(object, stream, Dumper=DataclassYamlDumper)
+
+
+def read_yaml(cls, stream, **config_kwargs):
+    """
+    Reads an object from the input YAML stream.
+    The object will be deserialized as the passed `cls` class.
+
+    See `dataclass_from_dict`.
+    """
+    import yaml
+
+    data = yaml.safe_load(stream)
+    return dataclass_from_dict(cls, data, **config_kwargs)
