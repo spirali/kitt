@@ -16,3 +16,4 @@ dacite @ git+https://github.com/kobzol/dacite@82fe831c45dca05297a04fbafe0dd72ad1
 keras-unet==0.1.2
 typing_extensions==4.1.1;python_version<'3.8'
 scikit-learn>=1.0.2
+protobuf<4
