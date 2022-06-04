@@ -38,6 +38,7 @@ class ModelCheckpoint(Callback):
         save_every_n_epochs: int = None,
         save_n_best=1,
         save_optimizer=False,
+        save_last_symlink=True,
     ):
         """
         :param filepath: Filepath where to save the model. Can contain "epoch" and "<monitor>"
@@ -48,6 +49,9 @@ class ModelCheckpoint(Callback):
         :param save_n_best: Save last N best models.
         :param save_every_n_epochs: Save the model every N epochs.
         :param save_optimizer: Include optimizer state in the saved model checkpoint.
+        :param save_last_symlink: Store a symlink named `last-saved.hdf5` in the checkpoint
+        directory. This symlink will always point to the most recent model that has been saved to
+        disk.
         """
         super().__init__()
 
@@ -64,6 +68,7 @@ class ModelCheckpoint(Callback):
         self.total_epochs = 0
         self.last_metric = None
         self.save_optimizer = save_optimizer
+        self.save_last_symlink = save_last_symlink
 
         assert self.save_every_n_epochs is None or self.save_every_n_epochs > 0
         assert self.save_n_best >= 0
@@ -150,6 +155,15 @@ class ModelCheckpoint(Callback):
 
     def save_model(self, path: str):
         self.model.save(path, overwrite=True, include_optimizer=self.save_optimizer)
+
+        if self.save_last_symlink:
+            last_path = Path(os.path.dirname(path)) / "last-saved.hdf5"
+            try:
+                os.unlink(last_path)
+            except IOError:
+                # We do not care if the symlink did not exist
+                pass
+            os.symlink(path, last_path)
 
     def get_filepath(self, epoch, logs) -> str:
         return self.filepath.format(epoch=epoch, **logs)
