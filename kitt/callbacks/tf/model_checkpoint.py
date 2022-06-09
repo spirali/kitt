@@ -61,6 +61,8 @@ class ModelCheckpoint(Callback):
             )
 
         self.filepath = str(filepath)
+        os.makedirs(os.path.dirname(self.filepath), exist_ok=True)
+
         self.monitor = monitor
         self.save_n_best = save_n_best or 0
         self.save_every_n_epochs = save_every_n_epochs
