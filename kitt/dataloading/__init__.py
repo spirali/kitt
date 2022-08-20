@@ -76,6 +76,14 @@ class ListDataLoader(DataLoader):
         return (ListDataLoader(train), ListDataLoader(test))
 
 
+class EmptyLoader(DataLoader):
+    def split(self, test_ratio: float) -> Tuple["DataLoader", "DataLoader"]:
+        return (EmptyLoader(), EmptyLoader())
+
+    def __len__(self):
+        return 0
+
+
 class LoaderWrapper(DataLoader):
     """
     Wraps a loader and delegates everything to it.
