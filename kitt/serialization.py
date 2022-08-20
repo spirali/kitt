@@ -1,5 +1,5 @@
 import dataclasses
-from typing import TypeVar
+from typing import Type, TypeVar
 
 import dacite
 from dacite import Config
@@ -132,7 +132,7 @@ def write_yaml(object, stream):
 T = TypeVar("T")
 
 
-def read_yaml(cls: T, stream, **config_kwargs) -> T:
+def read_yaml(cls: Type[T], stream, **config_kwargs) -> T:
     """
     Reads an object from the input YAML stream.
     The object will be deserialized as the passed `cls` class.
@@ -140,6 +140,10 @@ def read_yaml(cls: T, stream, **config_kwargs) -> T:
     See `dataclass_from_dict`.
     """
     import yaml
+
+    # Convert [a, b, c] to (a, b, c) if needed
+    if "cast" not in config_kwargs:
+        config_kwargs["cast"] = [tuple]
 
     data = yaml.safe_load(stream)
     return dataclass_from_dict(cls, data, **config_kwargs)
