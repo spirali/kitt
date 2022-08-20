@@ -169,7 +169,6 @@ class ZipLoader(DataLoader):
 class BatchIndexer:
     def __init__(self, length: int, batch_size: int, seed=None, shuffle=True):
         assert batch_size > 0
-        assert length > 0
 
         if not shuffle:
             assert seed is None
