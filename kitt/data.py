@@ -23,7 +23,9 @@ def train_test_split(items: List, test_ratio: float) -> Tuple[List, List]:
     return training, test
 
 
-def train_test_split_indices(indices: Union[List, int], test_ratio: float) -> Tuple[List[int], List[int]]:
+def train_test_split_indices(
+    indices: Union[List, int], test_ratio: float
+) -> Tuple[List[int], List[int]]:
     """
     Creates two lists of indices (train, test).
     `indices` can either be a list-like value from which the length is taken, or the length
