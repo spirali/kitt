@@ -1,4 +1,5 @@
 import dataclasses
+from typing import TypeVar
 
 import dacite
 from dacite import Config
@@ -128,7 +129,10 @@ def write_yaml(object, stream):
     yaml.dump(object, stream, Dumper=DataclassYamlDumper)
 
 
-def read_yaml(cls, stream, **config_kwargs):
+T = TypeVar("T")
+
+
+def read_yaml(cls: T, stream, **config_kwargs) -> T:
     """
     Reads an object from the input YAML stream.
     The object will be deserialized as the passed `cls` class.
