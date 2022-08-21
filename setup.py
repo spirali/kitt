@@ -14,7 +14,7 @@ with open("requirements.txt") as reqs:
 
 setup(
     name="kitt",
-    version="0.0.1",
+    version=read("version.txt"),
     author="KITT team",
     description="Machine learning toolkit",
     license="MIT",
