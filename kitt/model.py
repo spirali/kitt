@@ -10,6 +10,7 @@ from .dataloading import DataLoader, MappingLoader
 from .dataloading.mapping import create_tuple_mapper
 from .dataloading.preprocessing import IdentityPreprocessing, Preprocessing
 from .environment import get_constructor_arguments
+from .files import GenericPath
 
 
 class ModelWrapper:
@@ -33,7 +34,7 @@ class ModelWrapper:
             ),
         )
 
-    def restore_from_checkpoint(self, file: Union[str, bytes]) -> keras.Model:
+    def restore_from_checkpoint(self, file: Union[GenericPath, bytes]) -> keras.Model:
         if isinstance(file, (str, Path)):
             model = load_model(file, custom_objects=self.get_custom_objects())
         elif isinstance(file, (bytes, bytearray)):

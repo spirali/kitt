@@ -5,7 +5,7 @@ import numpy as np
 from tensorflow.keras.preprocessing.image import ImageDataGenerator
 
 from ..dataloading import DataLoader, ListDataLoader, LoaderWrapper
-from ..files import iterate_files
+from ..files import GenericPath, iterate_files
 from .image.tf import load_image
 
 
@@ -17,7 +17,7 @@ class ImageLoader(ListDataLoader):
     Otherwise only image data is returned.
     """
 
-    def __init__(self, paths: List[str], with_path=True, **load_image_args):
+    def __init__(self, paths: List[GenericPath], with_path=True, **load_image_args):
         super().__init__(paths)
         self.load_image_args = load_image_args
         self.with_path = with_path
