@@ -2,7 +2,9 @@ import glob
 import itertools
 import os
 from pathlib import Path
-from typing import Iterable, Union
+from typing import Callable, Iterable, Union
+
+GenericPath = Union[Path, str]
 
 
 def iterate_files(directory: str, extension: str, prefix: str = "") -> Iterable[str]:
@@ -27,7 +29,27 @@ def iterate_directories(
     )
 
 
-GenericPath = Union[Path, str]
+def iterate_files_from(
+    path: GenericPath, filter_fn: Callable[[Path], bool] = None
+) -> Iterable[Path]:
+    """
+    Recursively return all files located at the given `path`.
+
+    :param path: Path to a file or a directory.
+    :param filter_fn Function that can be used to filter returned paths (e.g. by extension or
+    prefix).
+    """
+    if path.is_file():
+        files = [path]
+    elif path.is_dir() or path.is_symlink():
+        files = glob.glob(f"{path}/**/*", recursive=True)
+    else:
+        raise Exception(f"Invalid path {path}")
+
+    for path in sorted(files):
+        path = Path(path)
+        if filter_fn is not None and filter_fn(path):
+            yield path
 
 
 def ensure_directory(path: GenericPath) -> Path:
