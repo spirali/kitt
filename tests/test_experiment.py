@@ -1,7 +1,11 @@
 import json
 from os.path import dirname
 
-from kitt.experiment.experiment import ExperimentTracker, generate_name_from_params
+from kitt.experiment.experiment import (
+    ExperimentTracker,
+    Parameter,
+    generate_name_from_params,
+)
 
 
 def test_generate_name_from_params_simple():
@@ -42,10 +46,15 @@ def test_run_dump_to_disk():
     with tracker.new_run("bar") as run:
         run.record_artifact("artifact1")
         run.record_param("a", 5)
-        run.record_params({"b": 3, "c": 4})
+        run.record_params(
+            {
+                "b": Parameter(value=3, is_hyperparameter=True, value_str="3"),
+                "c": Parameter(value=4, is_hyperparameter=True, value_str="4"),
+            }
+        )
         run.record_metric("accuracy", 0.8)
 
-    with open(run.path("result.json")) as f:
+    with open(run.data_path("result.json")) as f:
         data = json.loads(f.read())
         assert data == {
             "artifacts": ["artifact1"],
