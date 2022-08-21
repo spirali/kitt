@@ -7,7 +7,9 @@ from typing import Callable, Iterable, Union
 GenericPath = Union[Path, str]
 
 
-def iterate_files(directory: str, extension: str, prefix: str = "") -> Iterable[str]:
+def iterate_files(
+    directory: GenericPath, extension: str, prefix: str = ""
+) -> Iterable[str]:
     """Recursively return all files with the given `prefix` and `extension`
     that belong inside the given `directory`."""
     extension = extension.lstrip(".")
@@ -18,7 +20,9 @@ def iterate_files(directory: str, extension: str, prefix: str = "") -> Iterable[
 
 
 def iterate_directories(
-    directories: Union[str, Iterable[str]], extension: str, prefix: str = ""
+    directories: Union[GenericPath, Iterable[GenericPath]],
+    extension: str,
+    prefix: str = "",
 ) -> Iterable[str]:
     """Recursively return all files with the given `extension` from a list of directories."""
     if isinstance(directories, str):
@@ -39,6 +43,7 @@ def iterate_files_from(
     :param filter_fn Function that can be used to filter returned paths (e.g. by extension or
     prefix).
     """
+    path = Path(path)
     if path.is_file():
         files = [path]
     elif path.is_dir() or path.is_symlink():
@@ -47,9 +52,12 @@ def iterate_files_from(
         raise Exception(f"Invalid path {path}")
 
     for path in sorted(files):
-        path = Path(path)
-        if filter_fn is not None and filter_fn(path):
-            yield path
+        path = Path(path).resolve()
+        if not path.is_file():
+            continue
+        if filter_fn is not None and not filter_fn(path):
+            continue
+        yield path
 
 
 def ensure_directory(path: GenericPath) -> Path:

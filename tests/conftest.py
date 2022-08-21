@@ -7,6 +7,8 @@ import cv2
 import numpy as np
 from PIL import Image, ImageChops, ImageDraw, ImageStat
 
+from kitt.files import GenericPath
+
 TEST_DIR = Path(__file__).absolute().parent
 ROOT_DIR = TEST_DIR.parent
 
@@ -19,8 +21,8 @@ def in_ci() -> bool:
     return "CI" in os.environ
 
 
-def data_path(path: str) -> str:
-    return str(TEST_DIR / "data" / path)
+def data_path(path: str) -> Path:
+    return TEST_DIR / "data" / path
 
 
 def image_bless_enabled() -> bool:
@@ -54,7 +56,7 @@ def bless_image(image_rgb: np.ndarray, reference_path: Path):
     cv2.imwrite(str(reference_path), image_br)
 
 
-def check_image_equality(image: np.ndarray, path: str, delta=0.01):
+def check_image_equality(image: np.ndarray, path: GenericPath, delta=0.01):
     """
     Checks that `image` is "close enough" to the image stored at the provided `path`.
     :param image: RGB OpenCV image.

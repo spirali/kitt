@@ -1,4 +1,4 @@
-from kitt.files import iterate_directories, iterate_files
+from kitt.files import iterate_directories, iterate_files, iterate_files_from
 
 from .conftest import data_path
 
@@ -22,3 +22,16 @@ def test_iterate_directories():
     assert len(files) == 3
     files = list(iterate_directories((directory1, directory2), "baz"))
     assert len(files) == 0
+
+
+def test_iterate_files_from():
+    assert list(iterate_files_from(data_path("files/d1/a1.foo"))) == [
+        data_path("files/d1/a1.foo")
+    ]
+    assert list(iterate_files_from(data_path("files"))) == [
+        data_path("files/d1/a1.foo"),
+        data_path("files/d1/e1.foo"),
+        data_path("files/d1/e2.foo"),
+        data_path("files/d2/a1.foo"),
+        data_path("files/d2/e2.foo"),
+    ]
