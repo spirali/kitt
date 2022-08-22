@@ -152,8 +152,8 @@ class Run:
 
     def get_formatted_params(self) -> str:
         params = sorted(self.parameters.items(), key=lambda item: item[0])
-        output = f"Run {self.name} at {self.directory}"
-        output += "\n".join(f"{k}: {pprint.pformat(v)}" for (k, v) in params)
+        output = f"Run {self.name} at {self.directory}\n"
+        output += "\n".join(f"{k}: {pprint.pformat(v.value)}" for (k, v) in params)
         return output
 
 
