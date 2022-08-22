@@ -1,4 +1,5 @@
 import math
+from typing import List, Optional
 
 import cv2
 import matplotlib.pyplot as plt
@@ -14,25 +15,35 @@ from ...files import GenericPath
 from ...image.plot import render_plt_to_cv
 
 
-def draw_confusion_matrices(confusion_matrices: np.ndarray, columns=4):
+def draw_confusion_matrices(
+    confusion_matrices: np.ndarray, labels: Optional[List[str]] = None, columns=4
+):
     """
     Draws confusion matrices using pyplot.
 
     :param confusion_matrices: Numpy array containing one or more confusion matrices.
     Shape should be (2, 2) or (N, 2, 2).
+    :param labels: Optional labels for the individual confusion matrices.
     :param columns: How many columns should the CM grid wrap to.
     """
     if confusion_matrices.ndim == 2:
         confusion_matrices = np.expand_dims(confusion_matrices, axis=0)
 
+    labels = (
+        labels
+        if labels is not None
+        else [str(index) for index in range(len(confusion_matrices))]
+    )
+    assert len(labels) == len(confusion_matrices)
+
     df = pd.DataFrame(columns=["class", "gt", "prediction", "count"], dtype=int)
 
-    for (class_index, cm) in enumerate(confusion_matrices):
+    for (class_label, cm) in zip(labels, confusion_matrices):
         # rows are GTs, columns are predictions
         tn, fp, fn, tp = [int(v) for v in cm.ravel()]
         frame = pd.DataFrame(
             {
-                "class": [class_index] * 4,
+                "class": [class_label] * 4,
                 "gt": [0, 0, 1, 1],
                 "prediction": [0, 1, 0, 1],
                 "count": [tn, fp, fn, tp],
@@ -97,18 +108,21 @@ class ConfusionMatrixCallback(Callback):
         sequence: Sequence,
         every_n_epochs=10,
         round_threshold=0.5,
+        classes: Optional[List[str]] = None,
     ):
         """
         :param log_dir: Where to store TensorBoard output data.
         :param sequence: Input sequence which will be used to generate the confusion matrices.
         :param every_n_epochs: Only compute the output every N epochs.
         :param round_threshold: Threshold used for rounding the predictions to 0 or 1.
+        :param classes: Optional labels for the predicted classes.
         """
         super().__init__()
         self.writer = tf.summary.create_file_writer(str(log_dir))
         self.sequence = sequence
         self.every_n_epochs = every_n_epochs
         self.round_threshold = round_threshold
+        self.classes = classes
 
     def on_epoch_end(self, epoch: int, *args, **kwargs):
         if (epoch % self.every_n_epochs) != 0:
@@ -128,7 +142,7 @@ class ConfusionMatrixCallback(Callback):
         cms = calculate_confusion_matrix(np.array(gts), predictions)
 
         def render():
-            draw_confusion_matrices(cms, columns=4)
+            draw_confusion_matrices(cms, labels=self.classes, columns=4)
             img = render_plt_to_cv()
             plt.close(plt.gcf())
             img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
