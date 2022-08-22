@@ -86,7 +86,7 @@ def calculate_confusion_matrix(gts: np.ndarray, predictions: np.ndarray) -> np.n
 
 class ConfusionMatrixCallback(Callback):
     """
-    Generates predictions the given sequence after each epoch.
+    Generates predictions from the given sequence after each epoch.
     Assumes a classification model that returns multi-label data.
     The confusion matrices of the data is then rendered in a grid.
     """
@@ -121,6 +121,9 @@ class ConfusionMatrixCallback(Callback):
             gts.extend(ys)
             predictions.extend(preds)
         predictions = (np.array(predictions) >= self.round_threshold).astype(np.float32)
+
+        if not gts:
+            return
 
         cms = calculate_confusion_matrix(np.array(gts), predictions)
 

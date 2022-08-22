@@ -11,7 +11,7 @@ from kitt.callbacks.tf.confusion_matrix import (
     calculate_confusion_matrix,
     draw_confusion_matrices,
 )
-from kitt.dataloading import BatchLoader, ListDataLoader
+from kitt.dataloading import BatchLoader, EmptyLoader, ListDataLoader
 from kitt.dataloading.tf import KerasSequence
 from kitt.image.plot import render_plt_to_cv
 
@@ -48,6 +48,23 @@ def test_cm_callback(tmpdir, class_count: int):
 
     cm = ConfusionMatrixCallback(tmpdir / "logs", sequence, every_n_epochs=1)
     train(sequence, cm, n_classes=class_count)
+
+
+def test_cm_callback_empty_loader(tmpdir):
+    loader = ListDataLoader(
+        [
+            (0.1, list(itertools.islice(alternating_zero_one(), 2))),
+            (-0.1, list(itertools.islice(alternating_zero_one(), 2))),
+            (1.5, list(itertools.islice(alternating_zero_one(), 2))),
+        ]
+    )
+    loader = BatchLoader(loader, batch_size=2)
+    sequence = KerasSequence(loader)
+
+    val_sequence = KerasSequence(BatchLoader(EmptyLoader(), batch_size=2))
+
+    cm = ConfusionMatrixCallback(tmpdir / "logs", val_sequence, every_n_epochs=1)
+    train(sequence, cm, n_classes=2)
 
 
 @pytest.mark.parametrize("class_count", (1, 2))
