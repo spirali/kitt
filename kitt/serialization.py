@@ -16,6 +16,10 @@ def dataclass_from_dict(cls, data, **config_kwargs):
     if "strict_unions_match" not in config_kwargs:
         config_kwargs["strict_unions_match"] = True
 
+    # Convert [a, b, c] to (a, b, c) if needed
+    if "cast" not in config_kwargs:
+        config_kwargs["cast"] = [tuple]
+
     config = Config(**config_kwargs)
 
     from dacite.types import is_union
@@ -140,10 +144,6 @@ def read_yaml(cls: Type[T], stream, **config_kwargs) -> T:
     See `dataclass_from_dict`.
     """
     import yaml
-
-    # Convert [a, b, c] to (a, b, c) if needed
-    if "cast" not in config_kwargs:
-        config_kwargs["cast"] = [tuple]
 
     data = yaml.safe_load(stream)
     return dataclass_from_dict(cls, data, **config_kwargs)
