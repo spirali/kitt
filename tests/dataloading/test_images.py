@@ -9,9 +9,9 @@ from ..conftest import data_path
 
 def test_iterate_images_directory():
     assert set(iterate_images(data_path("dataset"))) == {
-        data_path("dataset/1.jpeg"),
-        data_path("dataset/2.jpeg"),
-        data_path("dataset/3.jpeg"),
+        str(data_path("dataset/1.jpeg")),
+        str(data_path("dataset/2.jpeg")),
+        str(data_path("dataset/3.jpeg"))
     }
 
 

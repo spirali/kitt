@@ -64,7 +64,7 @@ class ImageAugmentationLoader(LoaderWrapper):
         return next(flow)[0]
 
 
-def iterate_images(path: str):
+def iterate_images(path: GenericPath):
     """Return an iterator that finds all JPG/PNG images under recursively the given path."""
 
     def filter_fn(p):
