@@ -6,7 +6,7 @@ import pprint
 import random
 import string
 from pathlib import Path
-from typing import Any, Dict, Optional
+from typing import Any, Dict, Optional, Union
 
 from ..environment import write_environment_yaml
 from ..files import GenericPath, ensure_directory
@@ -80,8 +80,12 @@ class Run:
             value=value, is_hyperparameter=is_hyperparameter, value_str=value_str
         )
 
-    def record_params(self, parameters: Dict[str, Parameter]):
-        self.parameters.update(parameters)
+    def record_params(self, parameters: Dict[str, Union[Parameter, Any]]):
+        for key, value in parameters.items():
+            if isinstance(value, Parameter):
+                self.parameters[key] = value
+            else:
+                self.record_param(name=key, value=value)
 
     def record_metric(self, name: str, metric):
         """
