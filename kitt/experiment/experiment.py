@@ -32,7 +32,7 @@ class Run:
         self.name = name
         self.log_dir = Path(log_directory) / self.name
         self.parameters: Dict[str, Parameter] = {}
-        self.metrics = {}
+        self.metrics: Dict[str, Any] = {}
         self.artifacts = []
 
     def sub_run(self, name: str) -> "Run":
@@ -92,6 +92,10 @@ class Run:
         Log a calculated value of a run (i.e. validation accuracy).
         """
         self.metrics[name] = metric
+
+    def record_metrics(self, metrics: Dict[str, Any]):
+        for (key, value) in metrics.items():
+            self.record_metric(name=key, metric=value)
 
     # Metadata output
     def write_tb_summary(self, name: str, markdown_content: str):
