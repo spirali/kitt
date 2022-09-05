@@ -11,7 +11,7 @@ def test_iterate_images_directory():
     assert set(iterate_images(data_path("dataset"))) == {
         str(data_path("dataset/1.jpeg")),
         str(data_path("dataset/2.jpeg")),
-        str(data_path("dataset/3.jpeg"))
+        str(data_path("dataset/3.jpeg")),
     }
 
 
