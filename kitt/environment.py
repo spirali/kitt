@@ -42,12 +42,16 @@ def get_environment():
 
 
 def get_git_info():
-    changed = get_process_output(["git", "diff", "--name-status", "HEAD"]).splitlines()
-    changed = [line.strip() for line in changed]
+    changed = get_process_output(["git", "diff", "--name-status", "HEAD"])
+    if changed is not None:
+        changed = changed.splitlines()
+        changed = [line.strip() for line in changed]
+    else:
+        changed = "<unknown>"
 
     return {
-        "branch": get_process_output(["git", "rev-parse", "--abbrev-ref", "HEAD"]),
-        "sha": get_process_output(["git", "rev-parse", "HEAD"]),
+        "branch": get_process_output(["git", "rev-parse", "--abbrev-ref", "HEAD"]) or "<unknown>",
+        "sha": get_process_output(["git", "rev-parse", "HEAD"]) or "<unknown>",
         "changes": changed,
     }
 
