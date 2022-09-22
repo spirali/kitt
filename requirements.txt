@@ -8,9 +8,8 @@ matplotlib>=3
 seaborn>=0.10
 requests>=2.24
 keras>=2.4
-tensorflow>=2.3,<2.9; sys_platform != "darwin"
+tensorflow>=2.3,<=2.10; sys_platform != "darwin"
 tensorflow-macos>=2.5; sys_platform == "darwin"
-tensorflow-metal>=0.1; sys_platform == "darwin"
 pyyaml>=5
 dacite @ git+https://github.com/kobzol/dacite@82fe831c45dca05297a04fbafe0dd72ad15f8050
 keras-unet==0.1.2
