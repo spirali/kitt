@@ -39,6 +39,7 @@ class ModelCheckpoint(Callback):
         save_n_best=1,
         save_optimizer=False,
         save_last_symlink=True,
+        initial_value_threshold: float = None,
     ):
         """
         :param filepath: Filepath where to save the model. Can contain "epoch" and "<monitor>"
@@ -81,6 +82,11 @@ class ModelCheckpoint(Callback):
             self.metric_map_fn = lambda x: -x
         else:
             raise Exception(f"Unknown mode {mode}")
+
+        if initial_value_threshold is not None:
+            self.initial_value_threshold_mapped = self.metric_map_fn(initial_value_threshold)
+        else:
+            self.initial_value_threshold_mapped = float("-inf")
 
         # Invariants
         # self.best_queue[0] is the worst saved model
@@ -125,9 +131,11 @@ class ModelCheckpoint(Callback):
         self.push_model(self.last_metric, self.last_metric, final_path, pin=True)
 
     def is_better(self, metric_value: float):
+        value = self.metric_map_fn(metric_value)
+        if value <= self.initial_value_threshold_mapped:
+            return False
         if len(self.best_queue) < self.save_n_best:
             return True
-        value = self.metric_map_fn(metric_value)
         return value > self.best_queue[0].metric
 
     def push_model(self, epoch: int, metric_value: float, path: str, pin: bool):
