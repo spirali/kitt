@@ -2,6 +2,8 @@ import dataclasses
 import heapq
 import logging
 import os
+import shutil
+import tempfile
 from pathlib import Path
 from typing import List, Optional
 
@@ -164,7 +166,16 @@ class ModelCheckpoint(Callback):
                     )
 
     def save_model(self, path: str):
-        self.model.save(path, overwrite=True, include_optimizer=self.save_optimizer)
+        """
+        Saving models in Keras is not atomic, so if the process crashes while overwriting an
+        existing model, it could result in corrupt file on disk.
+        We thus save the model to a temporary location on disk, and then atomically rename it to the
+        original path.
+        """
+        with tempfile.TemporaryDirectory() as tmpdir:
+            tmp_path = Path(tmpdir) / "model.hdf5"
+            self.model.save(str(tmp_path), overwrite=True, include_optimizer=self.save_optimizer)
+            shutil.move(tmp_path, path)
 
         if self.save_last_symlink:
             last_path = Path(os.path.dirname(path)) / "last-saved.hdf5"
